@@ -1,4 +1,4 @@
-export default function Sidebar({ role, activePage, setActivePage, user, onLogout }) {
+export default function Sidebar({ role, activePage, setActivePage, user, onLogout, isMobile, isOpen }) {
   const adminMenu = [
     { id: 'dashboard', icon: '⊞', label: 'Dashboard' },
     { id: 'aidatlar', icon: '₺', label: 'Aidatlar' },
@@ -16,8 +16,14 @@ export default function Sidebar({ role, activePage, setActivePage, user, onLogou
   ]
   const menu = role === 'admin' ? adminMenu : residentMenu
 
+  const mobileStyle = isMobile ? {
+    position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 100,
+    transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
+    transition: 'transform 0.25s ease',
+  } : {}
+
   return (
-    <aside style={s.sidebar}>
+    <aside style={{ ...s.sidebar, ...mobileStyle }}>
       {/* Logo */}
       <div style={s.logo}>
         <span style={s.logoIcon}>⬡</span>

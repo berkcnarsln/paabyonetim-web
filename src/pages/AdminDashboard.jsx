@@ -4,7 +4,15 @@ import client from '../api/client'
 
 export default function AdminDashboard({ user, onLogout }) {
   const [activePage, setActivePage] = useState('dashboard')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const buildingId = user.building_id || 1
+
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', h)
+    return () => window.removeEventListener('resize', h)
+  }, [])
 
   const renderContent = () => {
     switch (activePage) {
@@ -23,12 +31,30 @@ export default function AdminDashboard({ user, onLogout }) {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <Sidebar role="admin" activePage={activePage} setActivePage={setActivePage} user={user} onLogout={onLogout} />
+      {isMobile && sidebarOpen && (
+        <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 99 }} />
+      )}
+      <Sidebar
+        role="admin"
+        activePage={activePage}
+        setActivePage={(page) => { setActivePage(page); setSidebarOpen(false) }}
+        user={user}
+        onLogout={onLogout}
+        isMobile={isMobile}
+        isOpen={sidebarOpen}
+      />
       <main style={s.main}>
         <div style={s.topbar}>
-          <div>
-            <h1 style={s.pageTitle}>{titles[activePage]}</h1>
-            <p style={s.pageDate}>Bugün, {new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {isMobile && (
+              <button onClick={() => setSidebarOpen(o => !o)} style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '22px', cursor: 'pointer', padding: '4px', lineHeight: 1 }}>
+                ☰
+              </button>
+            )}
+            <div>
+              <h1 style={s.pageTitle}>{titles[activePage]}</h1>
+              <p style={s.pageDate}>Bugün, {new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+            </div>
           </div>
         </div>
         <div style={s.content}>{renderContent()}</div>

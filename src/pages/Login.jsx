@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import client from '../api/client'
 
 export default function Login({ onLogin }) {
@@ -21,7 +21,12 @@ export default function Login({ onLogin }) {
     }
   }
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', h)
+    return () => window.removeEventListener('resize', h)
+  }, [])
 
   return (
     <div style={styles.wrapper}>
@@ -50,6 +55,12 @@ export default function Login({ onLogin }) {
 
       <div style={styles.right}>
         <div style={styles.card}>
+          {isMobile && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '28px' }}>
+              <span style={{ fontSize: '26px', color: '#3B82F6' }}>⬡</span>
+              <span style={{ fontFamily: 'Syne, sans-serif', fontSize: '22px', fontWeight: '800', letterSpacing: '4px', color: '#F1F5F9' }}>PaaB</span>
+            </div>
+          )}
           <h2 style={styles.cardTitle}>Giriş Yap</h2>
           <p style={styles.cardSub}>PaaBYonetim hesabınıza erişin</p>
 
