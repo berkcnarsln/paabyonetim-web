@@ -348,6 +348,7 @@ function KullanicilarContent({ buildingId }) {
   const { data, loading } = useApi(() => client.get(`/api/users?building_id=${buildingId}&role=resident`), [buildingId])
   const [list, setList] = useState(null)
   const [form, setForm] = useState({ name: '', email: '', password: '', apartment_id: '' })
+  const [editUser, setEditUser] = useState(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [showForm, setShowForm] = useState(false)
@@ -358,15 +359,24 @@ function KullanicilarContent({ buildingId }) {
     if (!form.name || !form.email || !form.password) { setError('İsim, e-posta ve şifre zorunlu'); return }
     setSaving(true); setError('')
     try {
-      const { data: created } = await client.post('/api/users', {
-        ...form,
-        role: 'resident',
-        building_id: buildingId,
-        apartment_id: form.apartment_id || null,
-      })
+      const { data: created } = await client.post('/api/users', { ...form, role: 'resident', building_id: buildingId, apartment_id: form.apartment_id || null })
       setList(prev => [...(prev || []), created])
       setForm({ name: '', email: '', password: '', apartment_id: '' })
       setShowForm(false)
+    } catch (err) {
+      setError(err.response?.data?.error || 'Hata oluştu')
+    } finally { setSaving(false) }
+  }
+
+  const guncelle = async () => {
+    if (!editUser.name) { setError('İsim zorunlu'); return }
+    setSaving(true); setError('')
+    try {
+      const payload = { name: editUser.name, apartment_id: editUser.apartment_id || null, building_id: buildingId }
+      if (editUser.password) payload.password = editUser.password
+      const { data: updated } = await client.put(`/api/users/${editUser.id}`, payload)
+      setList(prev => prev.map(u => u.id === updated.id ? { ...u, ...updated } : u))
+      setEditUser(null)
     } catch (err) {
       setError(err.response?.data?.error || 'Hata oluştu')
     } finally { setSaving(false) }
@@ -378,8 +388,14 @@ function KullanicilarContent({ buildingId }) {
     setList(prev => prev.filter(u => u.id !== id))
   }
 
+  const aptLabel = (id) => {
+    const a = (apartments || []).find(a => a.id === parseInt(id))
+    return a ? (a.block ? `${a.block}-${a.unit_number}` : a.unit_number) : '-'
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Yeni kullanıcı formu */}
       {showForm && (
         <div style={s.card}>
           <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>Yeni Sakin Ekle</h3>
@@ -389,15 +405,33 @@ function KullanicilarContent({ buildingId }) {
             <input style={s.input} placeholder="E-posta" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
             <input style={s.input} placeholder="Şifre (min. 6 karakter)" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
             <select style={s.input} value={form.apartment_id} onChange={e => setForm({ ...form, apartment_id: e.target.value })}>
-              <option value="">Daire Seç (isteğe bağlı)</option>
-              {(apartments || []).map(a => (
-                <option key={a.id} value={a.id}>{a.block ? `${a.block}-${a.unit_number}` : a.unit_number} {a.owner_name ? `(${a.owner_name})` : ''}</option>
-              ))}
+              <option value="">Daire Seç</option>
+              {(apartments || []).map(a => <option key={a.id} value={a.id}>{a.block ? `${a.block}-${a.unit_number}` : a.unit_number}{a.owner_name ? ` (${a.owner_name})` : ''}</option>)}
             </select>
           </div>
           <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
             <button style={s.btnPrimary} onClick={kaydet} disabled={saving}>{saving ? 'Kaydediliyor...' : '✓ Kaydet'}</button>
             <button style={{ ...s.btnPrimary, background: 'rgba(255,255,255,0.06)' }} onClick={() => { setShowForm(false); setError('') }}>İptal</button>
+          </div>
+        </div>
+      )}
+
+      {/* Düzenleme formu */}
+      {editUser && (
+        <div style={{ ...s.card, border: '1px solid rgba(59,130,246,0.3)' }}>
+          <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>Kullanıcı Düzenle — {editUser.email}</h3>
+          {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '10px', color: '#FCA5A5', fontSize: '13px', marginBottom: '12px' }}>{error}</div>}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <input style={s.input} placeholder="Ad Soyad" value={editUser.name} onChange={e => setEditUser({ ...editUser, name: e.target.value })} />
+            <select style={s.input} value={editUser.apartment_id || ''} onChange={e => setEditUser({ ...editUser, apartment_id: e.target.value })}>
+              <option value="">Daire Seç</option>
+              {(apartments || []).map(a => <option key={a.id} value={a.id}>{a.block ? `${a.block}-${a.unit_number}` : a.unit_number}{a.owner_name ? ` (${a.owner_name})` : ''}</option>)}
+            </select>
+            <input style={s.input} placeholder="Yeni şifre (değiştirmek için doldur)" type="password" value={editUser.password || ''} onChange={e => setEditUser({ ...editUser, password: e.target.value })} />
+          </div>
+          <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
+            <button style={s.btnPrimary} onClick={guncelle} disabled={saving}>{saving ? 'Kaydediliyor...' : '✓ Güncelle'}</button>
+            <button style={{ ...s.btnPrimary, background: 'rgba(255,255,255,0.06)' }} onClick={() => { setEditUser(null); setError('') }}>İptal</button>
           </div>
         </div>
       )}
@@ -415,9 +449,12 @@ function KullanicilarContent({ buildingId }) {
                 <tr key={u.id} style={s.tr}>
                   <td style={s.td}>{u.name}</td>
                   <td style={s.td}>{u.email}</td>
-                  <td style={s.td}>{u.unit_number ? <span style={s.daireBadge}>{u.unit_number}</span> : '-'}</td>
+                  <td style={s.td}>{u.apartment_id ? <span style={s.daireBadge}>{aptLabel(u.apartment_id)}</span> : '-'}</td>
                   <td style={s.td}><span style={{ ...s.badge, background: u.is_active ? 'rgba(16,185,129,0.12)' : 'rgba(100,116,139,0.12)', color: u.is_active ? '#10B981' : '#64748B' }}>{u.is_active ? 'Aktif' : 'Pasif'}</span></td>
-                  <td style={s.td}><button onClick={() => sil(u.id)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: '13px' }}>Devre Dışı</button></td>
+                  <td style={s.td}>
+                    <button onClick={() => { setEditUser({ ...u, password: '' }); setError(''); setShowForm(false) }} style={{ background: 'none', border: 'none', color: '#60A5FA', cursor: 'pointer', fontSize: '13px', marginRight: '10px' }}>Düzenle</button>
+                    <button onClick={() => sil(u.id)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: '13px' }}>Devre Dışı</button>
+                  </td>
                 </tr>
               ))}
               {!list?.length && <tr><td colSpan={5} style={{ ...s.td, textAlign: 'center', color: '#475569', padding: '30px' }}>Henüz kayıtlı sakin yok</td></tr>}
