@@ -6,6 +6,7 @@ export default function Sidebar({ role, activePage, setActivePage, user, onLogou
     { id: 'duyurular', icon: '📣', label: 'Duyurular' },
     { id: 'arizalar', icon: '🔧', label: 'Arızalar' },
     { id: 'giderler', icon: '📊', label: 'Giderler' },
+    { id: 'kullanicilar', icon: '👥', label: 'Kullanıcılar' },
   ]
   const residentMenu = [
     { id: 'dashboard', icon: '⊞', label: 'Genel Bakış' },

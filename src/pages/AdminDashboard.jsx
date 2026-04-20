@@ -14,11 +14,12 @@ export default function AdminDashboard({ user, onLogout }) {
       case 'duyurular': return <DuyurularContent buildingId={buildingId} />
       case 'arizalar': return <ArizalarContent buildingId={buildingId} />
       case 'giderler': return <GiderlerContent buildingId={buildingId} />
+      case 'kullanicilar': return <KullanicilarContent buildingId={buildingId} />
       default: return <DashboardContent buildingId={buildingId} />
     }
   }
 
-  const titles = { dashboard: 'Genel Bakış', aidatlar: 'Aidat Yönetimi', daireler: 'Daireler', duyurular: 'Duyurular', arizalar: 'Arıza Takibi', giderler: 'Gider Yönetimi' }
+  const titles = { dashboard: 'Genel Bakış', aidatlar: 'Aidat Yönetimi', daireler: 'Daireler', duyurular: 'Duyurular', arizalar: 'Arıza Takibi', giderler: 'Gider Yönetimi', kullanicilar: 'Kullanıcı Yönetimi' }
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -278,6 +279,92 @@ function GiderlerContent({ buildingId }) {
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  )
+}
+
+function KullanicilarContent({ buildingId }) {
+  const { data: apartments } = useApi(() => client.get(`/api/apartments?building_id=${buildingId}`), [buildingId])
+  const { data, loading } = useApi(() => client.get(`/api/users?building_id=${buildingId}&role=resident`), [buildingId])
+  const [list, setList] = useState(null)
+  const [form, setForm] = useState({ name: '', email: '', password: '', apartment_id: '' })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [showForm, setShowForm] = useState(false)
+
+  useEffect(() => { if (data) setList(data) }, [data])
+
+  const kaydet = async () => {
+    if (!form.name || !form.email || !form.password) { setError('İsim, e-posta ve şifre zorunlu'); return }
+    setSaving(true); setError('')
+    try {
+      const { data: created } = await client.post('/api/users', {
+        ...form,
+        role: 'resident',
+        building_id: buildingId,
+        apartment_id: form.apartment_id || null,
+      })
+      setList(prev => [...(prev || []), created])
+      setForm({ name: '', email: '', password: '', apartment_id: '' })
+      setShowForm(false)
+    } catch (err) {
+      setError(err.response?.data?.error || 'Hata oluştu')
+    } finally { setSaving(false) }
+  }
+
+  const sil = async (id) => {
+    if (!confirm('Bu kullanıcıyı devre dışı bırakmak istiyor musunuz?')) return
+    await client.delete(`/api/users/${id}`)
+    setList(prev => prev.filter(u => u.id !== id))
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {showForm && (
+        <div style={s.card}>
+          <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>Yeni Sakin Ekle</h3>
+          {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '10px', color: '#FCA5A5', fontSize: '13px', marginBottom: '12px' }}>{error}</div>}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <input style={s.input} placeholder="Ad Soyad" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+            <input style={s.input} placeholder="E-posta" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+            <input style={s.input} placeholder="Şifre (min. 6 karakter)" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+            <select style={s.input} value={form.apartment_id} onChange={e => setForm({ ...form, apartment_id: e.target.value })}>
+              <option value="">Daire Seç (isteğe bağlı)</option>
+              {(apartments || []).map(a => (
+                <option key={a.id} value={a.id}>{a.block ? `${a.block}-${a.unit_number}` : a.unit_number} {a.owner_name ? `(${a.owner_name})` : ''}</option>
+              ))}
+            </select>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
+            <button style={s.btnPrimary} onClick={kaydet} disabled={saving}>{saving ? 'Kaydediliyor...' : '✓ Kaydet'}</button>
+            <button style={{ ...s.btnPrimary, background: 'rgba(255,255,255,0.06)' }} onClick={() => { setShowForm(false); setError('') }}>İptal</button>
+          </div>
+        </div>
+      )}
+
+      <div style={s.card}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h3 style={s.cardTitle}>Kayıtlı Sakinler</h3>
+          <button style={s.btnPrimary} onClick={() => setShowForm(true)}>+ Yeni Sakin</button>
+        </div>
+        {loading ? <div style={{ color: '#475569' }}>Yükleniyor...</div> : (
+          <table style={s.table}>
+            <thead><tr>{['İsim', 'E-posta', 'Daire', 'Durum', 'İşlem'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
+            <tbody>
+              {(list || []).map(u => (
+                <tr key={u.id} style={s.tr}>
+                  <td style={s.td}>{u.name}</td>
+                  <td style={s.td}>{u.email}</td>
+                  <td style={s.td}>{u.unit_number ? <span style={s.daireBadge}>{u.unit_number}</span> : '-'}</td>
+                  <td style={s.td}><span style={{ ...s.badge, background: u.is_active ? 'rgba(16,185,129,0.12)' : 'rgba(100,116,139,0.12)', color: u.is_active ? '#10B981' : '#64748B' }}>{u.is_active ? 'Aktif' : 'Pasif'}</span></td>
+                  <td style={s.td}><button onClick={() => sil(u.id)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: '13px' }}>Devre Dışı</button></td>
+                </tr>
+              ))}
+              {!list?.length && <tr><td colSpan={5} style={{ ...s.td, textAlign: 'center', color: '#475569', padding: '30px' }}>Henüz kayıtlı sakin yok</td></tr>}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   )
