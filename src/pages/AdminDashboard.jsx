@@ -1,0 +1,325 @@
+import { useState, useEffect } from 'react'
+import Sidebar from '../components/Sidebar'
+import client from '../api/client'
+
+export default function AdminDashboard({ user, onLogout }) {
+  const [activePage, setActivePage] = useState('dashboard')
+  const buildingId = user.building_id || 1
+
+  const renderContent = () => {
+    switch (activePage) {
+      case 'dashboard': return <DashboardContent buildingId={buildingId} />
+      case 'aidatlar': return <AidatlarContent buildingId={buildingId} />
+      case 'daireler': return <DairelerContent buildingId={buildingId} />
+      case 'duyurular': return <DuyurularContent buildingId={buildingId} />
+      case 'arizalar': return <ArizalarContent buildingId={buildingId} />
+      case 'giderler': return <GiderlerContent buildingId={buildingId} />
+      default: return <DashboardContent buildingId={buildingId} />
+    }
+  }
+
+  const titles = { dashboard: 'Genel Bakış', aidatlar: 'Aidat Yönetimi', daireler: 'Daireler', duyurular: 'Duyurular', arizalar: 'Arıza Takibi', giderler: 'Gider Yönetimi' }
+
+  return (
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      <Sidebar role="admin" activePage={activePage} setActivePage={setActivePage} user={user} onLogout={onLogout} />
+      <main style={s.main}>
+        <div style={s.topbar}>
+          <div>
+            <h1 style={s.pageTitle}>{titles[activePage]}</h1>
+            <p style={s.pageDate}>Bugün, {new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+          </div>
+        </div>
+        <div style={s.content}>{renderContent()}</div>
+      </main>
+    </div>
+  )
+}
+
+function useApi(fn, deps = []) {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  useEffect(() => {
+    setLoading(true)
+    fn().then(r => setData(r.data)).catch(e => setError(e)).finally(() => setLoading(false))
+  }, deps)
+  return { data, loading, error }
+}
+
+function Spinner() {
+  return <div style={{ padding: '60px', textAlign: 'center', color: '#475569' }}>Yükleniyor...</div>
+}
+
+function DashboardContent({ buildingId }) {
+  const { data, loading } = useApi(() => client.get(`/api/dashboard/admin?building_id=${buildingId}`), [buildingId])
+  const { data: payments, loading: pLoading } = useApi(() => client.get(`/api/payments?building_id=${buildingId}&period=${new Date().toISOString().slice(0,7)}`), [buildingId])
+
+  if (loading || pLoading) return <Spinner />
+  if (!data) return null
+
+  const stats = [
+    { label: 'Toplam Daire', value: data.apartments?.total || '0', icon: '⬡', color: '#3B82F6', sub: `${data.apartments?.occupied || 0} dolu` },
+    { label: 'Tahsil Edilen', value: `₺${Number(data.payments?.collected || 0).toLocaleString('tr-TR')}`, icon: '₺', color: '#10B981', sub: 'Bu ay' },
+    { label: 'Bekleyen Aidat', value: data.payments?.pending || '0', icon: '⏳', color: '#F59E0B', sub: 'Daire' },
+    { label: 'Açık Arıza', value: data.repairs?.pending || '0', icon: '🔧', color: '#EF4444', sub: 'Bekliyor' },
+  ]
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div style={s.statsGrid}>
+        {stats.map(stat => (
+          <div key={stat.label} style={s.statCard}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <p style={s.statLabel}>{stat.label}</p>
+                <p style={{ ...s.statValue, color: stat.color }}>{stat.value}</p>
+                <p style={s.statSub}>{stat.sub}</p>
+              </div>
+              <div style={{ ...s.statIcon, background: `${stat.color}22`, color: stat.color }}>{stat.icon}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={s.twoCol}>
+        <div style={s.card}>
+          <h3 style={s.cardTitle}>Son Aidat Hareketleri</h3>
+          <table style={s.table}>
+            <thead><tr>{['Daire', 'Daire Sahibi', 'Tutar', 'Durum'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
+            <tbody>
+              {(payments || []).slice(0, 5).map(row => (
+                <tr key={row.id} style={s.tr}>
+                  <td style={s.td}><span style={s.daireBadge}>{row.block ? `${row.block}-${row.unit_number}` : row.unit_number}</span></td>
+                  <td style={s.td}>{row.owner_name || '-'}</td>
+                  <td style={s.td}>₺{Number(row.amount).toLocaleString('tr-TR')}</td>
+                  <td style={s.td}><StatusBadge durum={row.status} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div style={s.card}>
+          <h3 style={s.cardTitle}>Son Duyurular</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {(data.recent_announcements || []).map(d => (
+              <div key={d.id} style={s.duyuruItem}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span style={s.duyuruBaslik}>{d.title}</span>
+                  <span style={s.duyuruTarih}>{new Date(d.created_at).toLocaleDateString('tr-TR')}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function AidatlarContent({ buildingId }) {
+  const period = new Date().toISOString().slice(0, 7)
+  const { data, loading } = useApi(() => client.get(`/api/payments?building_id=${buildingId}&period=${period}`), [buildingId])
+
+  if (loading) return <Spinner />
+  return (
+    <div style={s.card}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h3 style={s.cardTitle}>Tüm Aidatlar — {period}</h3>
+        <span style={{ fontSize: '13px', color: '#64748B' }}>{(data || []).length} kayıt</span>
+      </div>
+      <table style={s.table}>
+        <thead><tr>{['Daire', 'Daire Sahibi', 'Tutar', 'Dönem', 'Durum'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
+        <tbody>
+          {(data || []).map(row => (
+            <tr key={row.id} style={s.tr}>
+              <td style={s.td}><span style={s.daireBadge}>{row.block ? `${row.block}-${row.unit_number}` : row.unit_number}</span></td>
+              <td style={s.td}>{row.owner_name || '-'}</td>
+              <td style={s.td}>₺{Number(row.amount).toLocaleString('tr-TR')}</td>
+              <td style={s.td}>{row.period}</td>
+              <td style={s.td}><StatusBadge durum={row.status} /></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function DairelerContent({ buildingId }) {
+  const { data, loading } = useApi(() => client.get(`/api/apartments?building_id=${buildingId}`), [buildingId])
+
+  if (loading) return <Spinner />
+  return (
+    <div style={s.card}>
+      <h3 style={{ ...s.cardTitle, marginBottom: '20px' }}>Daire Listesi</h3>
+      <table style={s.table}>
+        <thead><tr>{['Daire No', 'Kat', 'Tip', 'Daire Sahibi', 'Telefon', 'Durum'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
+        <tbody>
+          {(data || []).map(d => (
+            <tr key={d.id} style={s.tr}>
+              <td style={s.td}><span style={s.daireBadge}>{d.block ? `${d.block}-${d.unit_number}` : d.unit_number}</span></td>
+              <td style={s.td}>{d.floor ? `${d.floor}. Kat` : '-'}</td>
+              <td style={s.td}>{d.type || '-'}</td>
+              <td style={s.td}>{d.owner_name || '-'}</td>
+              <td style={s.td}>{d.owner_phone || '-'}</td>
+              <td style={s.td}><span style={{ ...s.badge, background: d.status === 'dolu' ? 'rgba(16,185,129,0.15)' : 'rgba(100,116,139,0.15)', color: d.status === 'dolu' ? '#10B981' : '#64748B' }}>{d.status}</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function DuyurularContent({ buildingId }) {
+  const { data, loading, error: fetchError } = useApi(() => client.get(`/api/announcements?building_id=${buildingId}`), [buildingId])
+  const [form, setForm] = useState({ title: '', content: '', priority: 'normal' })
+  const [saving, setSaving] = useState(false)
+  const [list, setList] = useState(null)
+
+  useEffect(() => { if (data) setList(data) }, [data])
+
+  const ekle = async () => {
+    if (!form.title || !form.content) return
+    setSaving(true)
+    try {
+      const { data: created } = await client.post('/api/announcements', { building_id: buildingId, ...form })
+      setList(prev => [created, ...(prev || [])])
+      setForm({ title: '', content: '', priority: 'normal' })
+    } catch { } finally { setSaving(false) }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={s.card}>
+        <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>Yeni Duyuru Ekle</h3>
+        <input style={{ ...s.input, marginBottom: '12px' }} placeholder="Duyuru başlığı" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+        <select style={{ ...s.input, marginBottom: '12px' }} value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })}>
+          <option value="normal">Normal</option>
+          <option value="önemli">Önemli</option>
+          <option value="acil">Acil</option>
+        </select>
+        <textarea style={{ ...s.input, height: '90px', resize: 'vertical' }} placeholder="Duyuru içeriği..." value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} />
+        <button style={{ ...s.btnPrimary, marginTop: '12px' }} onClick={ekle} disabled={saving}>
+          {saving ? 'Yayınlanıyor...' : '📣 Duyuru Yayınla'}
+        </button>
+      </div>
+      <div style={s.card}>
+        <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>Yayınlanan Duyurular</h3>
+        {loading ? <Spinner /> : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {(list || []).map(d => (
+              <div key={d.id} style={s.duyuruItem}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={s.duyuruBaslik}>{d.title}</span>
+                  <span style={s.duyuruTarih}>{new Date(d.created_at).toLocaleDateString('tr-TR')}</span>
+                </div>
+                <p style={s.duyuruIcerik}>{d.content}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function ArizalarContent({ buildingId }) {
+  const { data, loading } = useApi(() => client.get(`/api/repairs?building_id=${buildingId}`), [buildingId])
+
+  if (loading) return <Spinner />
+  return (
+    <div style={s.card}>
+      <h3 style={{ ...s.cardTitle, marginBottom: '20px' }}>Arıza Bildirimleri</h3>
+      <table style={s.table}>
+        <thead><tr>{['No', 'Konu', 'Daire', 'Tarih', 'Durum'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
+        <tbody>
+          {(data || []).map(a => (
+            <tr key={a.id} style={s.tr}>
+              <td style={s.td}><span style={{ color: '#64748B', fontSize: '13px' }}>#{a.id}</span></td>
+              <td style={s.td}>{a.title}</td>
+              <td style={s.td}><span style={s.daireBadge}>{a.block ? `${a.block}-${a.unit_number}` : (a.unit_number || 'Genel')}</span></td>
+              <td style={s.td}>{new Date(a.created_at).toLocaleDateString('tr-TR')}</td>
+              <td style={s.td}><StatusBadge durum={a.status} /></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function GiderlerContent({ buildingId }) {
+  const period = new Date().toISOString().slice(0, 7)
+  const { data, loading } = useApi(() => client.get(`/api/expenses?building_id=${buildingId}&period=${period}`), [buildingId])
+  const { data: summary } = useApi(() => client.get(`/api/expenses/summary?building_id=${buildingId}&period=${period}`), [buildingId])
+
+  const toplam = (data || []).reduce((acc, g) => acc + Number(g.amount), 0)
+
+  if (loading) return <Spinner />
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ ...s.statCard, background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)' }}>
+        <p style={s.statLabel}>{period} Toplam Gider</p>
+        <p style={{ ...s.statValue, color: '#3B82F6', fontSize: '36px' }}>₺{toplam.toLocaleString('tr-TR')}</p>
+      </div>
+      <div style={s.card}>
+        <h3 style={{ ...s.cardTitle, marginBottom: '20px' }}>Gider Detayları</h3>
+        <table style={s.table}>
+          <thead><tr>{['Kategori', 'Açıklama', 'Dönem', 'Tutar'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
+          <tbody>
+            {(data || []).map(g => (
+              <tr key={g.id} style={s.tr}>
+                <td style={s.td}><span style={{ ...s.badge, background: 'rgba(59,130,246,0.12)', color: '#60A5FA' }}>{g.category}</span></td>
+                <td style={s.td}>{g.description || '-'}</td>
+                <td style={s.td}>{g.period}</td>
+                <td style={{ ...s.td, color: '#EF4444', fontWeight: '600' }}>₺{Number(g.amount).toLocaleString('tr-TR')}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+function StatusBadge({ durum }) {
+  const map = {
+    'ödendi':     { bg: 'rgba(16,185,129,0.12)', color: '#10B981' },
+    'bekliyor':   { bg: 'rgba(245,158,11,0.12)', color: '#F59E0B' },
+    'gecikmiş':   { bg: 'rgba(239,68,68,0.12)',  color: '#EF4444' },
+    'tamamlandı': { bg: 'rgba(16,185,129,0.12)', color: '#10B981' },
+    'inceleniyor':{ bg: 'rgba(59,130,246,0.12)', color: '#60A5FA' },
+  }
+  const c = map[durum] || { bg: 'rgba(100,116,139,0.12)', color: '#94A3B8' }
+  return <span style={{ ...s.badge, background: c.bg, color: c.color }}>{durum}</span>
+}
+
+const s = {
+  main: { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#080D18' },
+  topbar: { padding: '24px 32px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  pageTitle: { fontFamily: 'Syne, sans-serif', fontSize: '22px', fontWeight: '700', color: '#F1F5F9' },
+  pageDate: { fontSize: '13px', color: '#475569', marginTop: '2px' },
+  content: { flex: 1, overflow: 'auto', padding: '28px 32px' },
+  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '16px' },
+  statCard: { background: '#111827', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '20px' },
+  statLabel: { fontSize: '12px', color: '#64748B', marginBottom: '8px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.5px' },
+  statValue: { fontSize: '28px', fontFamily: 'Syne, sans-serif', fontWeight: '700', marginBottom: '4px' },
+  statSub: { fontSize: '12px', color: '#475569' },
+  statIcon: { width: '40px', height: '40px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' },
+  twoCol: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' },
+  card: { background: '#111827', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '24px' },
+  cardTitle: { fontSize: '15px', fontWeight: '600', color: '#E2E8F0', marginBottom: '16px', fontFamily: 'Syne, sans-serif' },
+  table: { width: '100%', borderCollapse: 'collapse' },
+  th: { textAlign: 'left', padding: '10px 12px', fontSize: '11px', color: '#475569', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', borderBottom: '1px solid rgba(255,255,255,0.05)' },
+  tr: { borderBottom: '1px solid rgba(255,255,255,0.03)' },
+  td: { padding: '12px', fontSize: '14px', color: '#94A3B8' },
+  badge: { padding: '3px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '500' },
+  daireBadge: { padding: '3px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', background: 'rgba(59,130,246,0.1)', color: '#60A5FA', fontFamily: 'monospace' },
+  duyuruItem: { padding: '14px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' },
+  duyuruBaslik: { fontSize: '14px', fontWeight: '600', color: '#E2E8F0' },
+  duyuruTarih: { fontSize: '12px', color: '#475569' },
+  duyuruIcerik: { fontSize: '13px', color: '#64748B', marginTop: '6px', lineHeight: 1.5 },
+  btnPrimary: { background: 'linear-gradient(135deg, #3B82F6, #2563EB)', border: 'none', borderRadius: '8px', padding: '10px 18px', color: '#fff', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' },
+  input: { width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '12px 14px', color: '#F1F5F9', fontSize: '14px', outline: 'none', fontFamily: 'DM Sans, sans-serif', display: 'block', boxSizing: 'border-box' },
+}
