@@ -311,7 +311,29 @@ function DuyurularContent({ buildingId }) {
 }
 
 function ArizalarContent({ buildingId }) {
-  const { data, loading } = useApi(() => client.get(`/api/repairs?building_id=${buildingId}`), [buildingId])
+  const [repairs, setRepairs] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [updating, setUpdating] = useState(null)
+
+  useEffect(() => {
+    client.get(`/api/repairs?building_id=${buildingId}`)
+      .then(r => setRepairs(r.data))
+      .finally(() => setLoading(false))
+  }, [buildingId])
+
+  const updateStatus = async (id, status) => {
+    setUpdating(id)
+    try {
+      await client.put(`/api/repairs/${id}`, { status })
+      setRepairs(prev => prev.map(r => r.id === id ? { ...r, status } : r))
+    } catch {
+      alert('Durum güncellenemedi.')
+    } finally {
+      setUpdating(null)
+    }
+  }
+
+  const statusOptions = ['bekliyor', 'inceleniyor', 'tamamlandı']
 
   if (loading) return <Spinner />
   return (
@@ -320,13 +342,29 @@ function ArizalarContent({ buildingId }) {
       <table style={s.table}>
         <thead><tr>{['No', 'Konu', 'Daire', 'Tarih', 'Durum'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
         <tbody>
-          {(data || []).map(a => (
+          {(repairs || []).map(a => (
             <tr key={a.id} style={s.tr}>
               <td style={s.td}><span style={{ color: '#64748B', fontSize: '13px' }}>#{a.id}</span></td>
               <td style={s.td}>{a.title}</td>
               <td style={s.td}><span style={s.daireBadge}>{a.block ? `${a.block}-${a.unit_number}` : (a.unit_number || 'Genel')}</span></td>
               <td style={s.td}>{new Date(a.created_at).toLocaleDateString('tr-TR')}</td>
-              <td style={s.td}><StatusBadge durum={a.status} /></td>
+              <td style={s.td}>
+                <select
+                  value={a.status}
+                  disabled={updating === a.id}
+                  onChange={e => updateStatus(a.id, e.target.value)}
+                  style={{
+                    background: '#1E293B', border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '6px', padding: '5px 10px', color: '#F1F5F9',
+                    fontSize: '13px', cursor: 'pointer', outline: 'none',
+                    opacity: updating === a.id ? 0.5 : 1,
+                  }}
+                >
+                  {statusOptions.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </td>
             </tr>
           ))}
         </tbody>
