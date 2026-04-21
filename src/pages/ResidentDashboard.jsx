@@ -188,20 +188,35 @@ function DuyurularContent({ user }) {
   const { data, loading } = useApi(() => client.get(`/api/announcements?building_id=${buildingId}${aptParam}`), [])
 
   if (loading) return <Spinner />
+
+  const genel = (data || []).filter(d => !d.apartment_id)
+  const bana  = (data || []).filter(d => !!d.apartment_id)
+
+  const DuyuruCard = ({ d }) => (
+    <div style={{ ...s.duyuruItem, padding: '16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+        <span style={{ ...s.duyuruBaslik, fontSize: '15px' }}>{d.title}</span>
+        <span style={s.duyuruTarih}>{new Date(d.created_at).toLocaleDateString('tr-TR')}</span>
+      </div>
+      <p style={{ ...s.duyuruIcerik, fontSize: '14px' }}>{d.content}</p>
+    </div>
+  )
+
   return (
-    <div style={s.card}>
-      <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>Tüm Duyurular</h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {(data || []).map(d => (
-          <div key={d.id} style={{ ...s.duyuruItem, padding: '18px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ ...s.duyuruBaslik, fontSize: '16px' }}>{d.title}</span>
-              <span style={s.duyuruTarih}>{new Date(d.created_at).toLocaleDateString('tr-TR')}</span>
-            </div>
-            <p style={{ ...s.duyuruIcerik, fontSize: '14px' }}>{d.content}</p>
-          </div>
-        ))}
-        {!data?.length && <p style={{ color: '#475569', fontSize: '14px' }}>Duyuru yok</p>}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={s.card}>
+        <h3 style={{ ...s.cardTitle, marginBottom: '14px', color: '#60A5FA' }}>📢 Genel Duyurular</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {genel.map(d => <DuyuruCard key={d.id} d={d} />)}
+          {!genel.length && <p style={{ color: '#475569', fontSize: '14px' }}>Genel duyuru yok</p>}
+        </div>
+      </div>
+      <div style={s.card}>
+        <h3 style={{ ...s.cardTitle, marginBottom: '14px', color: '#A78BFA' }}>🏠 Bana Gelen Duyurular</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {bana.map(d => <DuyuruCard key={d.id} d={d} />)}
+          {!bana.length && <p style={{ color: '#475569', fontSize: '14px' }}>Size özel duyuru yok</p>}
+        </div>
       </div>
     </div>
   )

@@ -127,16 +127,27 @@ function DashboardContent({ buildingId }) {
         </div>
         <div style={s.card}>
           <h3 style={s.cardTitle}>Son Duyurular</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {(data.recent_announcements || []).map(d => (
-              <div key={d.id} style={s.duyuruItem}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <span style={s.duyuruBaslik}>{d.title}</span>
-                  <span style={s.duyuruTarih}>{new Date(d.created_at).toLocaleDateString('tr-TR')}</span>
+          {['genel', 'daire'].map(tip => {
+            const liste = (data.recent_announcements || []).filter(d => tip === 'genel' ? !d.apartment_id : !!d.apartment_id)
+            if (!liste.length) return null
+            return (
+              <div key={tip} style={{ marginBottom: '14px' }}>
+                <p style={{ fontSize: '11px', fontWeight: '600', color: tip === 'genel' ? '#60A5FA' : '#A78BFA', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                  {tip === 'genel' ? '📢 Genel' : '🏠 Daire Bazlı'}
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {liste.map(d => (
+                    <div key={d.id} style={s.duyuruItem}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={s.duyuruBaslik}>{d.title}</span>
+                        <span style={s.duyuruTarih}>{new Date(d.created_at).toLocaleDateString('tr-TR')}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
+            )
+          })}
         </div>
       </div>
     </div>
@@ -373,37 +384,38 @@ function DuyurularContent({ buildingId }) {
           {saving ? 'Yayınlanıyor...' : '📣 Duyuru Yayınla'}
         </button>
       </div>
-      <div style={s.card}>
-        <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>Yayınlanan Duyurular</h3>
-        {listLoading ? <Spinner /> : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {(list || []).map(d => (
-              <div key={d.id} style={s.duyuruItem}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <span style={s.duyuruBaslik}>{d.title}</span>
-                    {d.apartment_id ? (
-                      <span style={{ marginLeft: '8px', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', background: 'rgba(139,92,246,0.15)', color: '#A78BFA', fontWeight: '500' }}>
-                        🏠 {d.target_block ? `${d.target_block}-${d.target_unit}` : d.target_unit}
-                      </span>
-                    ) : (
-                      <span style={{ marginLeft: '8px', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', background: 'rgba(59,130,246,0.12)', color: '#60A5FA', fontWeight: '500' }}>
-                        📢 Tüm Bina
-                      </span>
-                    )}
+      {listLoading ? <Spinner /> : ['genel', 'daire'].map(tip => {
+        const baslik = tip === 'genel' ? '📢 Genel Duyurular' : '🏠 Daire Bazlı Duyurular'
+        const renk = tip === 'genel' ? '#60A5FA' : '#A78BFA'
+        const liste = (list || []).filter(d => tip === 'genel' ? !d.apartment_id : !!d.apartment_id)
+        return (
+          <div key={tip} style={s.card}>
+            <h3 style={{ ...s.cardTitle, marginBottom: '16px', color: renk }}>{baslik}</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {liste.map(d => (
+                <div key={d.id} style={s.duyuruItem}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <span style={s.duyuruBaslik}>{d.title}</span>
+                      {d.apartment_id && (
+                        <span style={{ marginLeft: '8px', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', background: 'rgba(139,92,246,0.15)', color: '#A78BFA', fontWeight: '500' }}>
+                          {d.target_block ? `${d.target_block}-${d.target_unit}` : d.target_unit}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={s.duyuruTarih}>{new Date(d.created_at).toLocaleDateString('tr-TR')}</span>
+                      <button onClick={() => sil(d.id)} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: '14px', padding: '2px' }} title="Sil">🗑</button>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={s.duyuruTarih}>{new Date(d.created_at).toLocaleDateString('tr-TR')}</span>
-                    <button onClick={() => sil(d.id)} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: '14px', padding: '2px' }} title="Sil">🗑</button>
-                  </div>
+                  <p style={s.duyuruIcerik}>{d.content}</p>
                 </div>
-                <p style={s.duyuruIcerik}>{d.content}</p>
-              </div>
-            ))}
-            {!list?.length && <p style={{ color: '#475569', fontSize: '14px' }}>Henüz duyuru yok</p>}
+              ))}
+              {!liste.length && <p style={{ color: '#475569', fontSize: '14px' }}>Henüz duyuru yok</p>}
+            </div>
           </div>
-        )}
-      </div>
+        )
+      })}
     </div>
   )
 }
@@ -443,7 +455,10 @@ function ArizalarContent({ buildingId }) {
           {(repairs || []).map(a => (
             <tr key={a.id} style={s.tr}>
               <td style={s.td}><span style={{ color: '#64748B', fontSize: '13px' }}>#{a.id}</span></td>
-              <td style={s.td}>{a.title}</td>
+              <td style={s.td}>
+                <p style={{ color: '#E2E8F0', fontWeight: '500' }}>{a.title}</p>
+                {a.description && <p style={{ fontSize: '12px', color: '#64748B', marginTop: '3px' }}>{a.description}</p>}
+              </td>
               <td style={s.td}><span style={s.daireBadge}>{a.block ? `${a.block}-${a.unit_number}` : (a.unit_number || 'Genel')}</span></td>
               <td style={s.td}>{a.reported_by_name || '-'}</td>
               <td style={s.td}>{new Date(a.created_at).toLocaleDateString('tr-TR')}</td>
@@ -473,34 +488,109 @@ function ArizalarContent({ buildingId }) {
 }
 
 function GiderlerContent({ buildingId }) {
-  const period = new Date().toISOString().slice(0, 7)
-  const { data, loading } = useApi(() => client.get(`/api/expenses?building_id=${buildingId}&period=${period}`), [buildingId])
-  const { data: summary } = useApi(() => client.get(`/api/expenses/summary?building_id=${buildingId}&period=${period}`), [buildingId])
+  const [selectedPeriod, setSelectedPeriod] = useState(new Date().toISOString().slice(0, 7))
+  const [list, setList] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [form, setForm] = useState({ category: 'Temizlik', description: '', amount: '', period: new Date().toISOString().slice(0, 7) })
+  const [saving, setSaving] = useState(false)
+  const [showForm, setShowForm] = useState(false)
 
-  const toplam = (data || []).reduce((acc, g) => acc + Number(g.amount), 0)
+  useEffect(() => {
+    setLoading(true)
+    client.get(`/api/expenses?building_id=${buildingId}&period=${selectedPeriod}`)
+      .then(r => setList(r.data))
+      .finally(() => setLoading(false))
+  }, [buildingId, selectedPeriod])
 
-  if (loading) return <Spinner />
+  const shiftMonth = (dir) => {
+    const d = new Date(selectedPeriod + '-01')
+    d.setMonth(d.getMonth() + dir)
+    setSelectedPeriod(d.toISOString().slice(0, 7))
+  }
+
+  const kaydet = async () => {
+    if (!form.amount || !form.category) return
+    setSaving(true)
+    try {
+      const { data: created } = await client.post('/api/expenses', { building_id: buildingId, ...form, amount: Number(form.amount) })
+      if (created.period === selectedPeriod) setList(prev => [created, ...(prev || [])])
+      setForm({ category: 'Temizlik', description: '', amount: '', period: new Date().toISOString().slice(0, 7) })
+      setShowForm(false)
+    } catch { } finally { setSaving(false) }
+  }
+
+  const sil = async (id) => {
+    if (!confirm('Bu gideri silmek istiyor musunuz?')) return
+    await client.delete(`/api/expenses/${id}`)
+    setList(prev => prev.filter(g => g.id !== id))
+  }
+
+  const toplam = (list || []).reduce((acc, g) => acc + Number(g.amount), 0)
+  const kategoriler = ['Temizlik', 'Bakım', 'Tadilat', 'Elektrik', 'Su', 'Asansör', 'Güvenlik', 'Diğer']
+
+  const [y, m] = selectedPeriod.split('-')
+  const ayAd = new Date(Number(y), Number(m) - 1).toLocaleString('tr-TR', { month: 'long', year: 'numeric' })
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <div style={{ ...s.statCard, background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)' }}>
-        <p style={s.statLabel}>{period} Toplam Gider</p>
-        <p style={{ ...s.statValue, color: '#3B82F6', fontSize: '36px' }}>₺{toplam.toLocaleString('tr-TR')}</p>
+      {/* Dönem seçici + Ekle butonu */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button onClick={() => shiftMonth(-1)} style={{ ...s.btnPrimary, padding: '8px 14px', background: '#1E293B' }}>‹</button>
+          <span style={{ fontFamily: 'Syne, sans-serif', fontSize: '18px', fontWeight: '700', color: '#F1F5F9', minWidth: '180px', textAlign: 'center', textTransform: 'capitalize' }}>{ayAd}</span>
+          <button onClick={() => shiftMonth(1)} style={{ ...s.btnPrimary, padding: '8px 14px', background: '#1E293B' }}>›</button>
+        </div>
+        <button onClick={() => setShowForm(f => !f)} style={s.btnPrimary}>
+          {showForm ? '✕ İptal' : '+ Gider Ekle'}
+        </button>
       </div>
+
+      {/* Gider Ekleme Formu */}
+      {showForm && (
+        <div style={s.card}>
+          <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>Yeni Gider Ekle</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+            <select style={s.input} value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+              {kategoriler.map(k => <option key={k} value={k}>{k}</option>)}
+            </select>
+            <input style={s.input} type="number" placeholder="Tutar (₺)" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} />
+            <input style={s.input} type="month" value={form.period} onChange={e => setForm({ ...form, period: e.target.value })} />
+          </div>
+          <input style={{ ...s.input, marginBottom: '12px' }} placeholder="Açıklama (isteğe bağlı)" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+          <button style={s.btnPrimary} onClick={kaydet} disabled={saving}>
+            {saving ? 'Kaydediliyor...' : '💾 Kaydet'}
+          </button>
+        </div>
+      )}
+
+      {/* Özet */}
+      <div style={{ ...s.statCard, background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)' }}>
+        <p style={s.statLabel}>{ayAd} Toplam Gider</p>
+        <p style={{ ...s.statValue, color: '#EF4444', fontSize: '32px' }}>₺{toplam.toLocaleString('tr-TR')}</p>
+      </div>
+
+      {/* Tablo */}
       <div style={s.card}>
-        <h3 style={{ ...s.cardTitle, marginBottom: '20px' }}>Gider Detayları</h3>
-        <table style={s.table}>
-          <thead><tr>{['Kategori', 'Açıklama', 'Dönem', 'Tutar'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
-          <tbody>
-            {(data || []).map(g => (
-              <tr key={g.id} style={s.tr}>
-                <td style={s.td}><span style={{ ...s.badge, background: 'rgba(59,130,246,0.12)', color: '#60A5FA' }}>{g.category}</span></td>
-                <td style={s.td}>{g.description || '-'}</td>
-                <td style={s.td}>{g.period}</td>
-                <td style={{ ...s.td, color: '#EF4444', fontWeight: '600' }}>₺{Number(g.amount).toLocaleString('tr-TR')}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>Gider Detayları</h3>
+        {loading ? <Spinner /> : (
+          <table style={s.table}>
+            <thead><tr>{['Kategori', 'Açıklama', 'Dönem', 'Tutar', ''].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
+            <tbody>
+              {(list || []).map(g => (
+                <tr key={g.id} style={s.tr}>
+                  <td style={s.td}><span style={{ ...s.badge, background: 'rgba(59,130,246,0.12)', color: '#60A5FA' }}>{g.category}</span></td>
+                  <td style={s.td}>{g.description || '-'}</td>
+                  <td style={s.td}>{g.period}</td>
+                  <td style={{ ...s.td, color: '#EF4444', fontWeight: '600' }}>₺{Number(g.amount).toLocaleString('tr-TR')}</td>
+                  <td style={s.td}>
+                    <button onClick={() => sil(g.id)} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: '14px' }}>🗑</button>
+                  </td>
+                </tr>
+              ))}
+              {!list?.length && <tr><td colSpan={5} style={{ ...s.td, textAlign: 'center', color: '#475569', padding: '32px' }}>Bu dönem için gider yok</td></tr>}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   )
