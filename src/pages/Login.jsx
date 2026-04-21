@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react'
 import client from '../api/client'
+import Logo from '../components/Logo'
 
 export default function Login({ onLogin }) {
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', h)
+    return () => window.removeEventListener('resize', h)
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -21,20 +29,12 @@ export default function Login({ onLogin }) {
     }
   }
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-  useEffect(() => {
-    const h = () => setIsMobile(window.innerWidth < 768)
-    window.addEventListener('resize', h)
-    return () => window.removeEventListener('resize', h)
-  }, [])
-
   return (
     <div style={styles.wrapper}>
       <div style={{ ...styles.left, display: isMobile ? 'none' : 'flex' }}>
         <div style={styles.leftInner}>
-          <div style={styles.logo}>
-            <span style={styles.logoIcon}>⬡</span>
-            <span style={styles.logoText}>PaaB</span>
+          <div style={styles.logoWrap}>
+            <Logo size="lg" showSubtitle />
           </div>
           <h1 style={styles.headline}>Sitenizi akıllıca yönetin.</h1>
           <p style={styles.sub}>
@@ -56,13 +56,12 @@ export default function Login({ onLogin }) {
       <div style={styles.right}>
         <div style={styles.card}>
           {isMobile && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '28px' }}>
-              <span style={{ fontSize: '26px', color: '#3B82F6' }}>⬡</span>
-              <span style={{ fontFamily: 'Syne, sans-serif', fontSize: '22px', fontWeight: '800', letterSpacing: '4px', color: '#F1F5F9' }}>PaaB</span>
+            <div style={{ marginBottom: '32px' }}>
+              <Logo size="md" showSubtitle />
             </div>
           )}
           <h2 style={styles.cardTitle}>Giriş Yap</h2>
-          <p style={styles.cardSub}>PaaBYonetim hesabınıza erişin</p>
+          <p style={styles.cardSub}>PAAB Yönetim hesabınıza erişin</p>
 
           <form onSubmit={handleSubmit} style={styles.form}>
             <div style={styles.field}>
@@ -112,9 +111,7 @@ const styles = {
     position: 'relative', overflow: 'hidden', padding: '60px',
   },
   leftInner: { position: 'relative', zIndex: 2, maxWidth: '480px' },
-  logo: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px' },
-  logoIcon: { fontSize: '32px', color: '#3B82F6' },
-  logoText: { fontFamily: 'Syne, sans-serif', fontSize: '28px', fontWeight: '800', letterSpacing: '4px', color: '#F1F5F9' },
+  logoWrap: { marginBottom: '48px' },
   headline: { fontFamily: 'Syne, sans-serif', fontSize: '42px', fontWeight: '700', lineHeight: 1.2, marginBottom: '16px', color: '#F1F5F9' },
   sub: { fontSize: '16px', color: '#94A3B8', lineHeight: 1.7, marginBottom: '40px' },
   features: { display: 'flex', flexDirection: 'column', gap: '14px' },

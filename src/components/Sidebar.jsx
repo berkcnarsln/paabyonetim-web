@@ -1,3 +1,5 @@
+import Logo from './Logo'
+
 export default function Sidebar({ role, activePage, setActivePage, user, onLogout, isMobile, isOpen }) {
   const adminMenu = [
     { id: 'dashboard', icon: '⊞', label: 'Dashboard' },
@@ -26,8 +28,7 @@ export default function Sidebar({ role, activePage, setActivePage, user, onLogou
     <aside style={{ ...s.sidebar, ...mobileStyle }}>
       {/* Logo */}
       <div style={s.logo}>
-        <span style={s.logoIcon}>⬡</span>
-        <span style={s.logoText}>PaaB</span>
+        <Logo size="md" />
       </div>
 
       {/* Role Badge */}
