@@ -119,7 +119,7 @@ const styles = {
   checkmark: { width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(59,130,246,0.15)', color: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700', flexShrink: 0 },
   bgBlob1: { position: 'absolute', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)', top: '-100px', right: '-100px', zIndex: 1 },
   bgBlob2: { position: 'absolute', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%)', bottom: '-50px', left: '-50px', zIndex: 1 },
-  right: { width: '480px', maxWidth: '100%', background: '#080D18', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', flex: 1 },
+  right: { width: '480px', background: '#080D18', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', flexShrink: 0 },
   card: { width: '100%' },
   cardTitle: { fontFamily: 'Syne, sans-serif', fontSize: '28px', fontWeight: '700', marginBottom: '8px', color: '#F1F5F9' },
   cardSub: { color: '#64748B', fontSize: '14px', marginBottom: '36px' },
