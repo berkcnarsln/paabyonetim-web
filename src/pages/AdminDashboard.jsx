@@ -144,30 +144,82 @@ function DashboardContent({ buildingId }) {
 }
 
 function AidatlarContent({ buildingId }) {
-  const period = new Date().toISOString().slice(0, 7)
-  const { data, loading } = useApi(() => client.get(`/api/payments?building_id=${buildingId}&period=${period}`), [buildingId])
+  const [period, setPeriod] = useState(new Date().toISOString().slice(0, 7))
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  if (loading) return <Spinner />
+  useEffect(() => {
+    setLoading(true)
+    client.get(`/api/payments?building_id=${buildingId}&period=${period}`)
+      .then(r => setData(r.data))
+      .finally(() => setLoading(false))
+  }, [buildingId, period])
+
+  const shiftMonth = (dir) => {
+    const d = new Date(period + '-01')
+    d.setMonth(d.getMonth() + dir)
+    setPeriod(d.toISOString().slice(0, 7))
+  }
+
+  const rows = data || []
+  const odendi   = rows.filter(r => r.status === 'ödendi')
+  const bekliyor = rows.filter(r => r.status === 'bekliyor')
+  const gecikm   = rows.filter(r => r.status === 'gecikmiş')
+  const toplam   = odendi.reduce((s, r) => s + Number(r.amount), 0)
+
+  const [y, m] = period.split('-')
+  const ayAd = new Date(Number(y), Number(m) - 1).toLocaleString('tr-TR', { month: 'long', year: 'numeric' })
+
   return (
-    <div style={s.card}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h3 style={s.cardTitle}>Tüm Aidatlar — {period}</h3>
-        <span style={{ fontSize: '13px', color: '#64748B' }}>{(data || []).length} kayıt</span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Dönem seçici */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <button onClick={() => shiftMonth(-1)} style={{ ...s.btnPrimary, padding: '8px 14px', background: '#1E293B' }}>‹</button>
+        <span style={{ fontFamily: 'Syne, sans-serif', fontSize: '18px', fontWeight: '700', color: '#F1F5F9', minWidth: '180px', textAlign: 'center', textTransform: 'capitalize' }}>{ayAd}</span>
+        <button onClick={() => shiftMonth(1)} style={{ ...s.btnPrimary, padding: '8px 14px', background: '#1E293B' }}>›</button>
       </div>
-      <table style={s.table}>
-        <thead><tr>{['Daire', 'Daire Sahibi', 'Tutar', 'Dönem', 'Durum'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
-        <tbody>
-          {(data || []).map(row => (
-            <tr key={row.id} style={s.tr}>
-              <td style={s.td}><span style={s.daireBadge}>{row.block ? `${row.block}-${row.unit_number}` : row.unit_number}</span></td>
-              <td style={s.td}>{row.owner_name || '-'}</td>
-              <td style={s.td}>₺{Number(row.amount).toLocaleString('tr-TR')}</td>
-              <td style={s.td}>{row.period}</td>
-              <td style={s.td}><StatusBadge durum={row.status} /></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+
+      {/* Özet kartlar */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
+        {[
+          { label: 'Tahsil Edilen', value: `₺${toplam.toLocaleString('tr-TR')}`, color: '#10B981', bg: 'rgba(16,185,129,0.08)' },
+          { label: 'Ödendi', value: odendi.length, color: '#10B981', bg: 'rgba(16,185,129,0.08)' },
+          { label: 'Bekliyor', value: bekliyor.length, color: '#F59E0B', bg: 'rgba(245,158,11,0.08)' },
+          { label: 'Gecikmiş', value: gecikm.length, color: '#EF4444', bg: 'rgba(239,68,68,0.08)' },
+        ].map(c => (
+          <div key={c.label} style={{ background: c.bg, border: `1px solid ${c.color}33`, borderRadius: '10px', padding: '16px' }}>
+            <p style={{ fontSize: '12px', color: '#64748B', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{c.label}</p>
+            <p style={{ fontSize: '22px', fontWeight: '700', color: c.color, fontFamily: 'Syne, sans-serif' }}>{c.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Tablo */}
+      <div style={s.card}>
+        {loading ? <Spinner /> : (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={s.cardTitle}>Aidat Listesi</h3>
+              <span style={{ fontSize: '13px', color: '#64748B' }}>{rows.length} daire</span>
+            </div>
+            <table style={s.table}>
+              <thead><tr>{['Daire', 'Daire Sahibi', 'Tutar', 'Son Ödeme', 'Durum'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
+              <tbody>
+                {rows.map(row => (
+                  <tr key={row.id} style={s.tr}>
+                    <td style={s.td}><span style={s.daireBadge}>{row.block ? `${row.block}-${row.unit_number}` : row.unit_number}</span></td>
+                    <td style={s.td}>{row.owner_name || '-'}</td>
+                    <td style={s.td}>₺{Number(row.amount).toLocaleString('tr-TR')}</td>
+                    <td style={s.td}>{row.due_date ? new Date(row.due_date).toLocaleDateString('tr-TR') : '-'}</td>
+                    <td style={s.td}><StatusBadge durum={row.status} /></td>
+                  </tr>
+                ))}
+                {rows.length === 0 && <tr><td colSpan={5} style={{ ...s.td, textAlign: 'center', color: '#475569', padding: '32px' }}>Bu dönem için kayıt yok</td></tr>}
+              </tbody>
+            </table>
+          </>
+        )}
+      </div>
     </div>
   )
 }

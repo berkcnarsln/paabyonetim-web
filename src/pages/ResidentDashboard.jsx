@@ -115,25 +115,69 @@ function OverviewContent({ user }) {
 }
 
 function AidatlarContent({ user }) {
+  const [year, setYear] = useState(new Date().getFullYear())
   const { data, loading } = useApi(() => client.get(`/api/payments?apartment_id=${user.apartment_id}`), [])
+
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const m = String(i + 1).padStart(2, '0')
+    const period = `${year}-${m}`
+    const kayit = (data || []).find(p => p.period === period)
+    return { period, m: i + 1, kayit }
+  })
+
+  const odendi   = months.filter(m => m.kayit?.status === 'ödendi').length
+  const bekliyor = months.filter(m => m.kayit?.status === 'bekliyor').length
+  const gecikm   = months.filter(m => m.kayit?.status === 'gecikmiş').length
 
   if (loading) return <Spinner />
   return (
-    <div style={s.card}>
-      <h3 style={{ ...s.cardTitle, marginBottom: '20px' }}>Aidat Geçmişim</h3>
-      <table style={s.table}>
-        <thead><tr>{['Dönem', 'Tutar', 'Son Ödeme', 'Durum'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
-        <tbody>
-          {(data || []).map(a => (
-            <tr key={a.id} style={s.tr}>
-              <td style={s.td}>{a.period}</td>
-              <td style={{ ...s.td, fontWeight: '600', color: '#F1F5F9' }}>₺{Number(a.amount).toLocaleString('tr-TR')}</td>
-              <td style={s.td}>{a.due_date ? new Date(a.due_date).toLocaleDateString('tr-TR') : '-'}</td>
-              <td style={s.td}><StatusBadge durum={a.status} /></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Yıl seçici */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <button onClick={() => setYear(y => y - 1)} style={{ ...s.btnPrimary, padding: '8px 14px', background: '#1E293B' }}>‹</button>
+        <span style={{ fontFamily: 'Syne, sans-serif', fontSize: '20px', fontWeight: '700', color: '#F1F5F9', minWidth: '80px', textAlign: 'center' }}>{year}</span>
+        <button onClick={() => setYear(y => y + 1)} style={{ ...s.btnPrimary, padding: '8px 14px', background: '#1E293B' }}>›</button>
+      </div>
+
+      {/* Özet */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+        {[
+          { label: 'Ödendi', value: odendi, color: '#10B981', bg: 'rgba(16,185,129,0.08)' },
+          { label: 'Bekliyor', value: bekliyor, color: '#F59E0B', bg: 'rgba(245,158,11,0.08)' },
+          { label: 'Gecikmiş', value: gecikm, color: '#EF4444', bg: 'rgba(239,68,68,0.08)' },
+        ].map(c => (
+          <div key={c.label} style={{ background: c.bg, border: `1px solid ${c.color}33`, borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
+            <p style={{ fontSize: '11px', color: '#64748B', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{c.label}</p>
+            <p style={{ fontSize: '26px', fontWeight: '700', color: c.color, fontFamily: 'Syne, sans-serif' }}>{c.value}<span style={{ fontSize: '13px', color: '#64748B', marginLeft: '2px' }}>ay</span></p>
+          </div>
+        ))}
+      </div>
+
+      {/* 12 aylık liste */}
+      <div style={s.card}>
+        <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>{year} Yılı Aidat Durumu</h3>
+        <table style={s.table}>
+          <thead><tr>{['Ay', 'Tutar', 'Son Ödeme', 'Durum'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
+          <tbody>
+            {months.map(({ period, m, kayit }) => {
+              const ayAd = new Date(year, m - 1).toLocaleString('tr-TR', { month: 'long' })
+              const buAy = period === new Date().toISOString().slice(0, 7)
+              return (
+                <tr key={period} style={{ ...s.tr, ...(buAy ? { background: 'rgba(59,130,246,0.04)' } : {}) }}>
+                  <td style={s.td}>
+                    <span style={{ color: buAy ? '#60A5FA' : '#E2E8F0', fontWeight: buAy ? '600' : '400', textTransform: 'capitalize' }}>
+                      {ayAd} {buAy && <span style={{ fontSize: '11px', color: '#3B82F6', marginLeft: '4px' }}>● güncel</span>}
+                    </span>
+                  </td>
+                  <td style={{ ...s.td, fontWeight: '600', color: '#F1F5F9' }}>{kayit ? `₺${Number(kayit.amount).toLocaleString('tr-TR')}` : '—'}</td>
+                  <td style={s.td}>{kayit?.due_date ? new Date(kayit.due_date).toLocaleDateString('tr-TR') : '—'}</td>
+                  <td style={s.td}>{kayit ? <StatusBadge durum={kayit.status} /> : <span style={{ color: '#334155', fontSize: '13px' }}>kayıt yok</span>}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
