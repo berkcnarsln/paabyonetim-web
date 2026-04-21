@@ -235,24 +235,41 @@ function AidatlarContent({ buildingId }) {
   )
 }
 
+const emptyDaire = { unit_number: '', block: '', floor: '', type: '', owner_name: '', owner_phone: '', monthly_fee: '', status: 'boş' }
+
 function DairelerContent({ buildingId }) {
   const { data, loading } = useApi(() => client.get(`/api/apartments?building_id=${buildingId}`), [buildingId])
   const [list, setList] = useState(null)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ unit_number: '', block: '', floor: '', type: '', owner_name: '', owner_phone: '', monthly_fee: '', status: 'boş' })
+  const [editId, setEditId] = useState(null)
+  const [form, setForm] = useState(emptyDaire)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => { if (data) setList(data) }, [data])
 
+  const openEdit = (d) => {
+    setEditId(d.id)
+    setForm({ unit_number: d.unit_number || '', block: d.block || '', floor: d.floor || '', type: d.type || '', owner_name: d.owner_name || '', owner_phone: d.owner_phone || '', monthly_fee: d.monthly_fee || '', status: d.status || 'boş' })
+    setShowForm(false)
+    setError('')
+  }
+
+  const iptal = () => { setEditId(null); setShowForm(false); setForm(emptyDaire); setError('') }
+
   const kaydet = async () => {
     if (!form.unit_number) { setError('Daire no zorunlu'); return }
     setSaving(true); setError('')
     try {
-      const { data: created } = await client.post('/api/apartments', { ...form, building_id: buildingId, floor: form.floor || null, monthly_fee: form.monthly_fee || 0 })
-      setList(prev => [...(prev || []), created])
-      setForm({ unit_number: '', block: '', floor: '', type: '', owner_name: '', owner_phone: '', monthly_fee: '', status: 'boş' })
-      setShowForm(false)
+      const payload = { ...form, building_id: buildingId, floor: form.floor || null, monthly_fee: form.monthly_fee || 0 }
+      if (editId) {
+        const { data: updated } = await client.put(`/api/apartments/${editId}`, payload)
+        setList(prev => prev.map(d => d.id === editId ? updated : d))
+      } else {
+        const { data: created } = await client.post('/api/apartments', payload)
+        setList(prev => [...(prev || []), created])
+      }
+      iptal()
     } catch (err) {
       setError(err.response?.data?.error || 'Hata oluştu')
     } finally { setSaving(false) }
@@ -264,14 +281,16 @@ function DairelerContent({ buildingId }) {
     setList(prev => prev.filter(d => d.id !== id))
   }
 
+  const formAcik = showForm || !!editId
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {showForm && (
+      {formAcik && (
         <div style={s.card}>
-          <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>Yeni Daire Ekle</h3>
+          <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>{editId ? 'Daireyi Düzenle' : 'Yeni Daire Ekle'}</h3>
           {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '10px', color: '#FCA5A5', fontSize: '13px', marginBottom: '12px' }}>{error}</div>}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-            <input style={s.input} placeholder="Daire No *  (örn: 101)" value={form.unit_number} onChange={e => setForm({ ...form, unit_number: e.target.value })} />
+            <input style={s.input} placeholder="Daire No * (örn: 101)" value={form.unit_number} onChange={e => setForm({ ...form, unit_number: e.target.value })} />
             <input style={s.input} placeholder="Blok (örn: A)" value={form.block} onChange={e => setForm({ ...form, block: e.target.value })} />
             <input style={s.input} placeholder="Kat (örn: 3)" type="number" value={form.floor} onChange={e => setForm({ ...form, floor: e.target.value })} />
             <input style={s.input} placeholder="Tip (örn: 3+1)" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} />
@@ -285,7 +304,7 @@ function DairelerContent({ buildingId }) {
           </div>
           <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
             <button style={s.btnPrimary} onClick={kaydet} disabled={saving}>{saving ? 'Kaydediliyor...' : '✓ Kaydet'}</button>
-            <button style={{ ...s.btnPrimary, background: 'rgba(255,255,255,0.06)' }} onClick={() => { setShowForm(false); setError('') }}>İptal</button>
+            <button style={{ ...s.btnPrimary, background: 'rgba(255,255,255,0.06)' }} onClick={iptal}>İptal</button>
           </div>
         </div>
       )}
@@ -293,14 +312,14 @@ function DairelerContent({ buildingId }) {
       <div style={s.card}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h3 style={s.cardTitle}>Daire Listesi</h3>
-          <button style={s.btnPrimary} onClick={() => setShowForm(true)}>+ Yeni Daire</button>
+          <button style={s.btnPrimary} onClick={() => { setShowForm(true); setEditId(null); setForm(emptyDaire) }}>+ Yeni Daire</button>
         </div>
         {loading ? <Spinner /> : (
           <table style={s.table}>
             <thead><tr>{['Daire No', 'Kat', 'Tip', 'Daire Sahibi', 'Telefon', 'Aylık Aidat', 'Durum', 'İşlem'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
             <tbody>
               {(list || []).map(d => (
-                <tr key={d.id} style={s.tr}>
+                <tr key={d.id} style={{ ...s.tr, ...(editId === d.id ? { background: 'rgba(59,130,246,0.06)' } : {}) }}>
                   <td style={s.td}><span style={s.daireBadge}>{d.block ? `${d.block}-${d.unit_number}` : d.unit_number}</span></td>
                   <td style={s.td}>{d.floor ? `${d.floor}. Kat` : '-'}</td>
                   <td style={s.td}>{d.type || '-'}</td>
@@ -308,7 +327,12 @@ function DairelerContent({ buildingId }) {
                   <td style={s.td}>{d.owner_phone || '-'}</td>
                   <td style={s.td}>₺{Number(d.monthly_fee || 0).toLocaleString('tr-TR')}</td>
                   <td style={s.td}><span style={{ ...s.badge, background: d.status === 'dolu' ? 'rgba(16,185,129,0.15)' : 'rgba(100,116,139,0.15)', color: d.status === 'dolu' ? '#10B981' : '#64748B' }}>{d.status}</span></td>
-                  <td style={s.td}><button onClick={() => sil(d.id)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: '13px' }}>Sil</button></td>
+                  <td style={s.td}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={() => openEdit(d)} style={{ background: 'none', border: 'none', color: '#60A5FA', cursor: 'pointer', fontSize: '13px', fontWeight: '500' }}>Düzenle</button>
+                      <button onClick={() => sil(d.id)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: '13px' }}>Sil</button>
+                    </div>
+                  </td>
                 </tr>
               ))}
               {!list?.length && <tr><td colSpan={8} style={{ ...s.td, textAlign: 'center', color: '#475569', padding: '30px' }}>Henüz daire eklenmedi</td></tr>}
