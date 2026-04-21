@@ -169,7 +169,7 @@ function ArizalarContent({ user }) {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    client.get(`/api/repairs?apartment_id=${user.apartment_id}`)
+    client.get(`/api/repairs?reported_by=${user.id}`)
       .then(r => setArizalar(r.data))
       .catch(console.error)
       .finally(() => setLoading(false))
