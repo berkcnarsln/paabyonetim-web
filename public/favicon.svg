@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Arka plan -->
+  <rect width="64" height="64" rx="14" fill="#0D1424"/>
+  <!-- Kutu -->
+  <rect x="8" y="8" width="48" height="48" rx="11" fill="rgba(59,130,246,0.18)" stroke="#3B82F6" stroke-width="2.5"/>
+  <!-- Üst çizgi (pencere chrome) -->
+  <line x1="16" y1="22" x2="48" y2="22" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="16" y1="27" x2="38" y2="27" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>
+  <!-- </> -->
+  <text x="32" y="52" text-anchor="middle" font-family="monospace" font-size="18" font-weight="700" fill="#60A5FA">&lt;/&gt;</text>
+</svg>

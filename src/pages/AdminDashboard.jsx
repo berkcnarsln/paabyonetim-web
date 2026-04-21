@@ -386,13 +386,14 @@ function ArizalarContent({ buildingId }) {
     <div style={s.card}>
       <h3 style={{ ...s.cardTitle, marginBottom: '20px' }}>Arıza Bildirimleri</h3>
       <table style={s.table}>
-        <thead><tr>{['No', 'Konu', 'Daire', 'Tarih', 'Durum'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
+        <thead><tr>{['No', 'Konu', 'Daire', 'Daire Sahibi', 'Tarih', 'Durum'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
         <tbody>
           {(repairs || []).map(a => (
             <tr key={a.id} style={s.tr}>
               <td style={s.td}><span style={{ color: '#64748B', fontSize: '13px' }}>#{a.id}</span></td>
               <td style={s.td}>{a.title}</td>
               <td style={s.td}><span style={s.daireBadge}>{a.block ? `${a.block}-${a.unit_number}` : (a.unit_number || 'Genel')}</span></td>
+              <td style={s.td}>{a.reported_by_name || '-'}</td>
               <td style={s.td}>{new Date(a.created_at).toLocaleDateString('tr-TR')}</td>
               <td style={s.td}>
                 <select
