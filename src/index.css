@@ -55,3 +55,30 @@ body {
 
 .animate-fadeUp { animation: fadeUp 0.5s ease forwards; }
 .animate-fadeIn { animation: fadeIn 0.4s ease forwards; }
+
+/* Select dropdown dark theme */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px !important;
+  cursor: pointer;
+}
+
+select option {
+  background-color: #1E293B;
+  color: #F1F5F9;
+  padding: 8px 12px;
+}
+
+select:focus {
+  outline: none;
+  border-color: #3B82F6 !important;
+}
+
+/* Arıza durum dropdown özel renkleri */
+select option[value="bekliyor"]    { color: #F59E0B; }
+select option[value="inceleniyor"] { color: #60A5FA; }
+select option[value="tamamlandı"]  { color: #10B981; }
