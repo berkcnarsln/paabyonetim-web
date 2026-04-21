@@ -140,7 +140,8 @@ function AidatlarContent({ user }) {
 
 function DuyurularContent({ user }) {
   const buildingId = user.building_id || 1
-  const { data, loading } = useApi(() => client.get(`/api/announcements?building_id=${buildingId}`), [])
+  const aptParam = user.apartment_id ? `&apartment_id=${user.apartment_id}` : ''
+  const { data, loading } = useApi(() => client.get(`/api/announcements?building_id=${buildingId}${aptParam}`), [])
 
   if (loading) return <Spinner />
   return (

@@ -258,33 +258,64 @@ function DairelerContent({ buildingId }) {
 }
 
 function DuyurularContent({ buildingId }) {
-  const { data, loading, error: fetchError } = useApi(() => client.get(`/api/announcements?building_id=${buildingId}`), [buildingId])
-  const [form, setForm] = useState({ title: '', content: '', priority: 'normal' })
+  const { data: apartmentData } = useApi(() => client.get(`/api/apartments?building_id=${buildingId}`), [buildingId])
+  const [form, setForm] = useState({ title: '', content: '', priority: 'normal', apartment_id: '' })
   const [saving, setSaving] = useState(false)
   const [list, setList] = useState(null)
+  const [listLoading, setListLoading] = useState(true)
 
-  useEffect(() => { if (data) setList(data) }, [data])
+  useEffect(() => {
+    client.get(`/api/announcements?building_id=${buildingId}`)
+      .then(r => setList(r.data))
+      .finally(() => setListLoading(false))
+  }, [buildingId])
 
   const ekle = async () => {
     if (!form.title || !form.content) return
     setSaving(true)
     try {
-      const { data: created } = await client.post('/api/announcements', { building_id: buildingId, ...form })
+      const payload = {
+        building_id: buildingId,
+        title: form.title,
+        content: form.content,
+        priority: form.priority,
+        apartment_id: form.apartment_id || null,
+      }
+      const { data: created } = await client.post('/api/announcements', payload)
       setList(prev => [created, ...(prev || [])])
-      setForm({ title: '', content: '', priority: 'normal' })
+      setForm({ title: '', content: '', priority: 'normal', apartment_id: '' })
     } catch { } finally { setSaving(false) }
   }
+
+  const sil = async (id) => {
+    try {
+      await client.delete(`/api/announcements/${id}`)
+      setList(prev => prev.filter(d => d.id !== id))
+    } catch { }
+  }
+
+  const apartments = apartmentData || []
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <div style={s.card}>
         <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>Yeni Duyuru Ekle</h3>
         <input style={{ ...s.input, marginBottom: '12px' }} placeholder="Duyuru başlığı" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
-        <select style={{ ...s.input, marginBottom: '12px' }} value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })}>
-          <option value="normal">Normal</option>
-          <option value="önemli">Önemli</option>
-          <option value="acil">Acil</option>
-        </select>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+          <select style={s.input} value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })}>
+            <option value="normal">Normal</option>
+            <option value="önemli">Önemli</option>
+            <option value="acil">Acil</option>
+          </select>
+          <select style={s.input} value={form.apartment_id} onChange={e => setForm({ ...form, apartment_id: e.target.value })}>
+            <option value="">📢 Tüm Binaya</option>
+            {apartments.map(a => (
+              <option key={a.id} value={a.id}>
+                🏠 {a.block ? `${a.block}-${a.unit_number}` : a.unit_number}{a.owner_name ? ` (${a.owner_name})` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
         <textarea style={{ ...s.input, height: '90px', resize: 'vertical' }} placeholder="Duyuru içeriği..." value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} />
         <button style={{ ...s.btnPrimary, marginTop: '12px' }} onClick={ekle} disabled={saving}>
           {saving ? 'Yayınlanıyor...' : '📣 Duyuru Yayınla'}
@@ -292,17 +323,32 @@ function DuyurularContent({ buildingId }) {
       </div>
       <div style={s.card}>
         <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>Yayınlanan Duyurular</h3>
-        {loading ? <Spinner /> : (
+        {listLoading ? <Spinner /> : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {(list || []).map(d => (
               <div key={d.id} style={s.duyuruItem}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={s.duyuruBaslik}>{d.title}</span>
-                  <span style={s.duyuruTarih}>{new Date(d.created_at).toLocaleDateString('tr-TR')}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <span style={s.duyuruBaslik}>{d.title}</span>
+                    {d.apartment_id ? (
+                      <span style={{ marginLeft: '8px', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', background: 'rgba(139,92,246,0.15)', color: '#A78BFA', fontWeight: '500' }}>
+                        🏠 {d.target_block ? `${d.target_block}-${d.target_unit}` : d.target_unit}
+                      </span>
+                    ) : (
+                      <span style={{ marginLeft: '8px', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', background: 'rgba(59,130,246,0.12)', color: '#60A5FA', fontWeight: '500' }}>
+                        📢 Tüm Bina
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={s.duyuruTarih}>{new Date(d.created_at).toLocaleDateString('tr-TR')}</span>
+                    <button onClick={() => sil(d.id)} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: '14px', padding: '2px' }} title="Sil">🗑</button>
+                  </div>
                 </div>
                 <p style={s.duyuruIcerik}>{d.content}</p>
               </div>
             ))}
+            {!list?.length && <p style={{ color: '#475569', fontSize: '14px' }}>Henüz duyuru yok</p>}
           </div>
         )}
       </div>
