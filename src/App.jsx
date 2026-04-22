@@ -2,10 +2,15 @@ import { useState, useEffect } from 'react'
 import Login from './pages/Login'
 import AdminDashboard from './pages/AdminDashboard'
 import ResidentDashboard from './pages/ResidentDashboard'
+import LandingPage from './pages/LandingPage'
+import { getSubdomain } from './api/client'
 
 export default function App() {
   const [user, setUser] = useState(null)
   const [ready, setReady] = useState(false)
+
+  const subdomain = getSubdomain()
+  const isTenant = Boolean(subdomain)
 
   useEffect(() => {
     const saved = localStorage.getItem('paab_user')
@@ -28,6 +33,11 @@ export default function App() {
   }
 
   if (!ready) return null
+
+  // Ana domain (paabyonetim.com veya localhost'ta VITE_TENANT yoksa) → Landing Page
+  if (!isTenant) return <LandingPage />
+
+  // Tenant subdomain → uygulama
   if (!user) return <Login onLogin={handleLogin} />
   if (user.role === 'admin') return <AdminDashboard user={user} onLogout={handleLogout} />
   return <ResidentDashboard user={user} onLogout={handleLogout} />
