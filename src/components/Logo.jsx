@@ -1,12 +1,12 @@
-export default function Logo({ size = 'md', showSubtitle = false, light = false }) {
+export default function Logo({ size = 'md', showSubtitle = false, light = false, tenantName = null }) {
   const cfg = {
-    sm: { icon: 28, title: 16, sub: 9, gap: 8, stroke: 1.5 },
-    md: { icon: 38, title: 22, sub: 11, gap: 10, stroke: 2 },
+    sm: { icon: 28, title: 16, sub: 9,  gap: 8,  stroke: 1.5 },
+    md: { icon: 38, title: 22, sub: 11, gap: 10, stroke: 2   },
     lg: { icon: 52, title: 30, sub: 13, gap: 14, stroke: 2.5 },
   }
   const { icon, title, sub, gap, stroke } = cfg[size]
   const textColor = light ? '#1E3A8A' : '#F1F5F9'
-  const subColor = light ? '#3B82F6' : '#64748B'
+  const subColor  = light ? '#3B82F6' : '#64748B'
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap }}>
@@ -21,17 +21,21 @@ export default function Logo({ size = 'md', showSubtitle = false, light = false 
           fontFamily: 'Syne, sans-serif',
           fontSize: title,
           fontWeight: 800,
-          letterSpacing: '3px',
+          letterSpacing: tenantName ? '0.5px' : '3px',
           color: textColor,
           lineHeight: 1,
         }}>
-          PAAB
+          {tenantName || 'PAAB'}
         </div>
-        {showSubtitle && (
+        {tenantName ? (
+          <div style={{ fontSize: sub, color: subColor, marginTop: 3, letterSpacing: '0.2px' }}>
+            PAAB Group bünyesindedir
+          </div>
+        ) : showSubtitle ? (
           <div style={{ fontSize: sub, color: subColor, marginTop: 3, letterSpacing: '0.3px' }}>
             Powerful Applications & Advanced Backend
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import Sidebar from '../components/Sidebar'
 import client from '../api/client'
 
-export default function ResidentDashboard({ user, onLogout }) {
+export default function ResidentDashboard({ user, onLogout, tenantName }) {
   const [activePage, setActivePage] = useState('dashboard')
 
   const titles = { dashboard: 'Genel Bakış', aidatlar: 'Aidatlarım', duyurular: 'Duyurular', arizalar: 'Arıza Bildir' }
@@ -19,7 +19,7 @@ export default function ResidentDashboard({ user, onLogout }) {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <Sidebar role="resident" activePage={activePage} setActivePage={setActivePage} user={user} onLogout={onLogout} />
+      <Sidebar role="resident" activePage={activePage} setActivePage={setActivePage} user={user} onLogout={onLogout} tenantName={tenantName} />
       <main style={s.main}>
         <div style={s.topbar}>
           <div>

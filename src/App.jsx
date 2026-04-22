@@ -4,19 +4,28 @@ import AdminDashboard from './pages/AdminDashboard'
 import ResidentDashboard from './pages/ResidentDashboard'
 import LandingPage from './pages/LandingPage'
 import { getSubdomain } from './api/client'
+import client from './api/client'
 
 export default function App() {
-  const [user, setUser] = useState(null)
-  const [ready, setReady] = useState(false)
+  const [user, setUser]           = useState(null)
+  const [ready, setReady]         = useState(false)
+  const [tenantName, setTenantName] = useState(null)
 
   const subdomain = getSubdomain()
-  const isTenant = Boolean(subdomain)
+  const isTenant  = Boolean(subdomain)
 
   useEffect(() => {
     const saved = localStorage.getItem('paab_user')
     if (saved) setUser(JSON.parse(saved))
     const theme = localStorage.getItem('paab_theme') || 'dark'
     document.documentElement.setAttribute('data-theme', theme)
+
+    if (isTenant) {
+      client.get('/api/tenant')
+        .then(r => setTenantName(r.data.name))
+        .catch(() => {})
+    }
+
     setReady(true)
   }, [])
 
@@ -33,12 +42,8 @@ export default function App() {
   }
 
   if (!ready) return null
-
-  // Ana domain (paabyonetim.com veya localhost'ta VITE_TENANT yoksa) → Landing Page
   if (!isTenant) return <LandingPage />
-
-  // Tenant subdomain → uygulama
-  if (!user) return <Login onLogin={handleLogin} />
-  if (user.role === 'admin') return <AdminDashboard user={user} onLogout={handleLogout} />
-  return <ResidentDashboard user={user} onLogout={handleLogout} />
+  if (!user) return <Login onLogin={handleLogin} tenantName={tenantName} />
+  if (user.role === 'admin') return <AdminDashboard user={user} onLogout={handleLogout} tenantName={tenantName} />
+  return <ResidentDashboard user={user} onLogout={handleLogout} tenantName={tenantName} />
 }

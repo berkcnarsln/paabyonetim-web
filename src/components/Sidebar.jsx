@@ -1,7 +1,7 @@
 import Logo from './Logo'
 import { useState } from 'react'
 
-export default function Sidebar({ role, activePage, setActivePage, user, onLogout, isMobile, isOpen }) {
+export default function Sidebar({ role, activePage, setActivePage, user, onLogout, isMobile, isOpen, tenantName }) {
   const [theme, setTheme] = useState(() => localStorage.getItem('paab_theme') || 'dark')
 
   const toggleTheme = () => {
@@ -37,7 +37,7 @@ export default function Sidebar({ role, activePage, setActivePage, user, onLogou
     <aside style={{ ...s.sidebar, ...mobileStyle }}>
       {/* Logo */}
       <div style={s.logo}>
-        <Logo size="md" />
+        <Logo size="md" tenantName={tenantName} />
       </div>
 
       {/* Role Badge */}

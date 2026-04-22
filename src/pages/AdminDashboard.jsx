@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import Sidebar from '../components/Sidebar'
 import client from '../api/client'
 
-export default function AdminDashboard({ user, onLogout }) {
+export default function AdminDashboard({ user, onLogout, tenantName }) {
   const [activePage, setActivePage] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
@@ -42,6 +42,7 @@ export default function AdminDashboard({ user, onLogout }) {
         onLogout={onLogout}
         isMobile={isMobile}
         isOpen={sidebarOpen}
+        tenantName={tenantName}
       />
       <main style={s.main}>
         <div style={s.topbar}>

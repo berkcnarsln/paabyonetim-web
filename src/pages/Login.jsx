@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import client from '../api/client'
 import Logo from '../components/Logo'
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, tenantName }) {
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [error, setError]       = useState('')
@@ -46,9 +46,9 @@ export default function Login({ onLogin }) {
       <div style={{ ...styles.left, display: isMobile ? 'none' : 'flex', background: leftBg }}>
         <div style={styles.leftInner}>
           <div style={styles.logoWrap}>
-            <Logo size="lg" showSubtitle />
+            <Logo size="lg" showSubtitle={!tenantName} tenantName={tenantName} />
           </div>
-          <h1 style={styles.headline}>Sitenizi akıllıca yönetin.</h1>
+          <h1 style={styles.headline}>{tenantName ? `${tenantName} Yönetim Paneli` : 'Sitenizi akıllıca yönetin.'}</h1>
           <p style={styles.sub}>
             Aidat takibi, duyurular, arıza bildirimleri ve çok daha fazlası — tek platformda.
           </p>
@@ -72,7 +72,7 @@ export default function Login({ onLogin }) {
         <div style={styles.card}>
           {isMobile && (
             <div style={{ marginBottom: '32px' }}>
-              <Logo size="md" showSubtitle />
+              <Logo size="md" showSubtitle={!tenantName} tenantName={tenantName} />
             </div>
           )}
           <h2 style={styles.cardTitle}>Giriş Yap</h2>
