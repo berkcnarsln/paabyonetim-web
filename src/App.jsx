@@ -4,28 +4,22 @@ import AdminDashboard from './pages/AdminDashboard'
 import ResidentDashboard from './pages/ResidentDashboard'
 import LandingPage from './pages/LandingPage'
 import { getSubdomain } from './api/client'
-import client from './api/client'
 
 export default function App() {
-  const [user, setUser]           = useState(null)
-  const [ready, setReady]         = useState(false)
-  const [tenantName, setTenantName] = useState(null)
+  const [user, setUser] = useState(null)
+  const [ready, setReady] = useState(false)
 
-  const subdomain = getSubdomain()
-  const isTenant  = Boolean(subdomain)
+  const subdomain  = getSubdomain()
+  const isTenant   = Boolean(subdomain)
+  const tenantName = subdomain
+    ? subdomain.charAt(0).toUpperCase() + subdomain.slice(1)
+    : null
 
   useEffect(() => {
     const saved = localStorage.getItem('paab_user')
     if (saved) setUser(JSON.parse(saved))
     const theme = localStorage.getItem('paab_theme') || 'dark'
     document.documentElement.setAttribute('data-theme', theme)
-
-    if (isTenant) {
-      client.get('/api/tenant')
-        .then(r => setTenantName(r.data.name))
-        .catch(() => {})
-    }
-
     setReady(true)
   }, [])
 
