@@ -1,6 +1,15 @@
 import Logo from './Logo'
+import { useState } from 'react'
 
 export default function Sidebar({ role, activePage, setActivePage, user, onLogout, isMobile, isOpen }) {
+  const [theme, setTheme] = useState(() => localStorage.getItem('paab_theme') || 'dark')
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    document.documentElement.setAttribute('data-theme', next)
+    localStorage.setItem('paab_theme', next)
+    setTheme(next)
+  }
   const adminMenu = [
     { id: 'dashboard', icon: '⊞', label: 'Dashboard' },
     { id: 'aidatlar', icon: '₺', label: 'Aidatlar' },
@@ -62,6 +71,9 @@ export default function Sidebar({ role, activePage, setActivePage, user, onLogou
           <p style={s.userName}>{user.name}</p>
           <p style={s.userEmail}>{user.email}</p>
         </div>
+        <button onClick={toggleTheme} style={{ ...s.logoutBtn, fontSize: '15px' }} title={theme === 'dark' ? 'Açık tema' : 'Koyu tema'}>
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
         <button onClick={onLogout} style={s.logoutBtn} title="Çıkış">⏻</button>
       </div>
     </aside>

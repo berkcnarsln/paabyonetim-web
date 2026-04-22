@@ -10,6 +10,8 @@ export default function App() {
   useEffect(() => {
     const saved = localStorage.getItem('paab_user')
     if (saved) setUser(JSON.parse(saved))
+    const theme = localStorage.getItem('paab_theme') || 'dark'
+    document.documentElement.setAttribute('data-theme', theme)
     setReady(true)
   }, [])
 

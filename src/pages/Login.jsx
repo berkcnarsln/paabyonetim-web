@@ -74,7 +74,7 @@ export default function Login({ onLogin }) {
                 required
                 style={styles.input}
                 onFocus={e => e.target.style.borderColor = '#3B82F6'}
-                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border-strong)'}
               />
             </div>
             <div style={styles.field}>
@@ -87,7 +87,7 @@ export default function Login({ onLogin }) {
                 required
                 style={styles.input}
                 onFocus={e => e.target.style.borderColor = '#3B82F6'}
-                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border-strong)'}
               />
             </div>
 
@@ -119,14 +119,14 @@ const styles = {
   checkmark: { width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(59,130,246,0.15)', color: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700', flexShrink: 0 },
   bgBlob1: { position: 'absolute', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)', top: '-100px', right: '-100px', zIndex: 1 },
   bgBlob2: { position: 'absolute', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%)', bottom: '-50px', left: '-50px', zIndex: 1 },
-  right: { width: '480px', background: '#080D18', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', flexShrink: 0 },
+  right: { width: '480px', background: 'var(--bg-page)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', flexShrink: 0 },
   card: { width: '100%' },
-  cardTitle: { fontFamily: 'Syne, sans-serif', fontSize: '28px', fontWeight: '700', marginBottom: '8px', color: '#F1F5F9' },
-  cardSub: { color: '#64748B', fontSize: '14px', marginBottom: '36px' },
+  cardTitle: { fontFamily: 'Syne, sans-serif', fontSize: '28px', fontWeight: '700', marginBottom: '8px', color: 'var(--t1)' },
+  cardSub: { color: 'var(--t4)', fontSize: '14px', marginBottom: '36px' },
   form: { display: 'flex', flexDirection: 'column', gap: '20px' },
   field: { display: 'flex', flexDirection: 'column', gap: '8px' },
-  label: { fontSize: '13px', fontWeight: '500', color: '#94A3B8', letterSpacing: '0.5px' },
-  input: { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '14px 16px', color: '#F1F5F9', fontSize: '15px', outline: 'none', transition: 'border-color 0.2s', fontFamily: 'DM Sans, sans-serif' },
+  label: { fontSize: '13px', fontWeight: '500', color: 'var(--t3)', letterSpacing: '0.5px' },
+  input: { background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: '10px', padding: '14px 16px', color: 'var(--t1)', fontSize: '15px', outline: 'none', transition: 'border-color 0.2s', fontFamily: 'DM Sans, sans-serif' },
   error: { background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '12px', color: '#FCA5A5', fontSize: '14px' },
   btn: { background: 'linear-gradient(135deg, #3B82F6, #2563EB)', border: 'none', borderRadius: '10px', padding: '15px', color: '#fff', fontSize: '15px', fontWeight: '600', cursor: 'pointer', transition: 'opacity 0.2s', fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.3px' },
 }
