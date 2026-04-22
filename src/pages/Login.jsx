@@ -37,9 +37,13 @@ export default function Login({ onLogin }) {
     }
   }
 
+  const leftBg = theme === 'dark'
+    ? 'linear-gradient(135deg, #0D1424 0%, #0A1628 100%)'
+    : 'linear-gradient(135deg, #1E3A5F 0%, #1a3a6e 100%)'
+
   return (
     <div style={styles.wrapper}>
-      <div style={{ ...styles.left, display: isMobile ? 'none' : 'flex' }}>
+      <div style={{ ...styles.left, display: isMobile ? 'none' : 'flex', background: leftBg }}>
         <div style={styles.leftInner}>
           <div style={styles.logoWrap}>
             <Logo size="lg" showSubtitle />
@@ -117,7 +121,7 @@ export default function Login({ onLogin }) {
 const styles = {
   wrapper: { display: 'flex', height: '100vh', overflow: 'hidden' },
   left: {
-    flex: 1, background: 'linear-gradient(135deg, #0D1424 0%, #0A1628 100%)',
+    flex: 1,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     position: 'relative', overflow: 'hidden', padding: '60px',
   },
@@ -131,7 +135,7 @@ const styles = {
   bgBlob1: { position: 'absolute', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)', top: '-100px', right: '-100px', zIndex: 1 },
   bgBlob2: { position: 'absolute', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%)', bottom: '-50px', left: '-50px', zIndex: 1 },
   right: { width: '480px', background: 'var(--bg-page)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', flexShrink: 0, position: 'relative' },
-  themeBtn: { position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', padding: '6px', borderRadius: '8px' },
+  themeBtn: { position: 'absolute', top: '20px', right: '20px', background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: '8px', fontSize: '18px', cursor: 'pointer', padding: '6px 10px', lineHeight: 1 },
   card: { width: '100%' },
   cardTitle: { fontFamily: 'Syne, sans-serif', fontSize: '28px', fontWeight: '700', marginBottom: '8px', color: 'var(--t1)' },
   cardSub: { color: 'var(--t4)', fontSize: '14px', marginBottom: '36px' },
