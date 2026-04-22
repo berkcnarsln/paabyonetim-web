@@ -623,9 +623,9 @@ function GiderlerContent({ buildingId }) {
 
 function KullanicilarContent({ buildingId }) {
   const { data: apartments } = useApi(() => client.get(`/api/apartments?building_id=${buildingId}`), [buildingId])
-  const { data, loading } = useApi(() => client.get(`/api/users?building_id=${buildingId}&role=resident`), [buildingId])
+  const { data, loading } = useApi(() => client.get(`/api/users?building_id=${buildingId}`), [buildingId])
   const [list, setList] = useState(null)
-  const [form, setForm] = useState({ name: '', email: '', password: '', apartment_id: '' })
+  const [form, setForm] = useState({ name: '', email: '', password: '', apartment_id: '', role: 'resident' })
   const [editUser, setEditUser] = useState(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -637,9 +637,9 @@ function KullanicilarContent({ buildingId }) {
     if (!form.name || !form.email || !form.password) { setError('İsim, e-posta ve şifre zorunlu'); return }
     setSaving(true); setError('')
     try {
-      const { data: created } = await client.post('/api/users', { ...form, role: 'resident', building_id: buildingId, apartment_id: form.apartment_id || null })
+      const { data: created } = await client.post('/api/users', { ...form, building_id: buildingId, apartment_id: form.apartment_id || null })
       setList(prev => [...(prev || []), created])
-      setForm({ name: '', email: '', password: '', apartment_id: '' })
+      setForm({ name: '', email: '', password: '', apartment_id: '', role: 'resident' })
       setShowForm(false)
     } catch (err) {
       setError(err.response?.data?.error || 'Hata oluştu')
@@ -650,7 +650,7 @@ function KullanicilarContent({ buildingId }) {
     if (!editUser.name) { setError('İsim zorunlu'); return }
     setSaving(true); setError('')
     try {
-      const payload = { name: editUser.name, apartment_id: editUser.apartment_id || null, building_id: buildingId }
+      const payload = { name: editUser.name, role: editUser.role, apartment_id: editUser.apartment_id || null, building_id: buildingId }
       if (editUser.password) payload.password = editUser.password
       const { data: updated } = await client.put(`/api/users/${editUser.id}`, payload)
       setList(prev => prev.map(u => u.id === updated.id ? { ...u, ...updated } : u))
@@ -676,14 +676,18 @@ function KullanicilarContent({ buildingId }) {
       {/* Yeni kullanıcı formu */}
       {showForm && (
         <div style={s.card}>
-          <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>Yeni Sakin Ekle</h3>
+          <h3 style={{ ...s.cardTitle, marginBottom: '16px' }}>Yeni Kullanıcı Ekle</h3>
           {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '10px', color: '#FCA5A5', fontSize: '13px', marginBottom: '12px' }}>{error}</div>}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <input style={s.input} placeholder="Ad Soyad" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
             <input style={s.input} placeholder="E-posta" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
             <input style={s.input} placeholder="Şifre (min. 6 karakter)" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+            <select style={s.input} value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}>
+              <option value="resident">Sakin</option>
+              <option value="admin">Yönetici</option>
+            </select>
             <select style={s.input} value={form.apartment_id} onChange={e => setForm({ ...form, apartment_id: e.target.value })}>
-              <option value="">Daire Seç</option>
+              <option value="">Daire Seç (opsiyonel)</option>
               {(apartments || []).map(a => <option key={a.id} value={a.id}>{a.block ? `${a.block}-${a.unit_number}` : a.unit_number}{a.owner_name ? ` (${a.owner_name})` : ''}</option>)}
             </select>
           </div>
@@ -701,6 +705,10 @@ function KullanicilarContent({ buildingId }) {
           {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '10px', color: '#FCA5A5', fontSize: '13px', marginBottom: '12px' }}>{error}</div>}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <input style={s.input} placeholder="Ad Soyad" value={editUser.name} onChange={e => setEditUser({ ...editUser, name: e.target.value })} />
+            <select style={s.input} value={editUser.role} onChange={e => setEditUser({ ...editUser, role: e.target.value })}>
+              <option value="resident">Sakin</option>
+              <option value="admin">Yönetici</option>
+            </select>
             <select style={s.input} value={editUser.apartment_id || ''} onChange={e => setEditUser({ ...editUser, apartment_id: e.target.value })}>
               <option value="">Daire Seç</option>
               {(apartments || []).map(a => <option key={a.id} value={a.id}>{a.block ? `${a.block}-${a.unit_number}` : a.unit_number}{a.owner_name ? ` (${a.owner_name})` : ''}</option>)}
@@ -716,17 +724,22 @@ function KullanicilarContent({ buildingId }) {
 
       <div style={s.card}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h3 style={s.cardTitle}>Kayıtlı Sakinler</h3>
-          <button style={s.btnPrimary} onClick={() => setShowForm(true)}>+ Yeni Sakin</button>
+          <h3 style={s.cardTitle}>Kullanıcılar</h3>
+          <button style={s.btnPrimary} onClick={() => setShowForm(true)}>+ Yeni Kullanıcı</button>
         </div>
         {loading ? <div style={{ color: '#475569' }}>Yükleniyor...</div> : (
           <table style={s.table}>
-            <thead><tr>{['İsim', 'E-posta', 'Daire', 'Durum', 'İşlem'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
+            <thead><tr>{['İsim', 'E-posta', 'Rol', 'Daire', 'Durum', 'İşlem'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
             <tbody>
               {(list || []).map(u => (
                 <tr key={u.id} style={s.tr}>
                   <td style={s.td}>{u.name}</td>
                   <td style={s.td}>{u.email}</td>
+                  <td style={s.td}>
+                    <span style={{ ...s.badge, background: u.role === 'admin' ? 'rgba(59,130,246,0.12)' : 'rgba(16,185,129,0.08)', color: u.role === 'admin' ? '#60A5FA' : '#34D399' }}>
+                      {u.role === 'admin' ? 'Yönetici' : 'Sakin'}
+                    </span>
+                  </td>
                   <td style={s.td}>{u.apartment_id ? <span style={s.daireBadge}>{aptLabel(u.apartment_id)}</span> : '-'}</td>
                   <td style={s.td}><span style={{ ...s.badge, background: u.is_active ? 'rgba(16,185,129,0.12)' : 'rgba(100,116,139,0.12)', color: u.is_active ? '#10B981' : '#64748B' }}>{u.is_active ? 'Aktif' : 'Pasif'}</span></td>
                   <td style={s.td}>
@@ -735,7 +748,7 @@ function KullanicilarContent({ buildingId }) {
                   </td>
                 </tr>
               ))}
-              {!list?.length && <tr><td colSpan={5} style={{ ...s.td, textAlign: 'center', color: '#475569', padding: '30px' }}>Henüz kayıtlı sakin yok</td></tr>}
+              {!list?.length && <tr><td colSpan={6} style={{ ...s.td, textAlign: 'center', color: '#475569', padding: '30px' }}>Henüz kayıtlı kullanıcı yok</td></tr>}
             </tbody>
           </table>
         )}
