@@ -1,13 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Login from './pages/Login'
 import AdminDashboard from './pages/AdminDashboard'
 import ResidentDashboard from './pages/ResidentDashboard'
 import LandingPage from './pages/LandingPage'
 import { getSubdomain } from './api/client'
 
+const INACTIVITY_MS = 15 * 60 * 1000 // 15 dakika
+
 export default function App() {
   const [user, setUser] = useState(null)
   const [ready, setReady] = useState(false)
+  const timerRef = useRef(null)
 
   const subdomain  = getSubdomain()
   const isTenant   = Boolean(subdomain)
@@ -29,11 +32,30 @@ export default function App() {
     setUser(userData)
   }
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem('paab_token')
     localStorage.removeItem('paab_user')
     setUser(null)
-  }
+  }, [])
+
+  // İnaktivite takibi — sadece giriş yapılmış ve tenant sayfasındayken çalışır
+  useEffect(() => {
+    if (!user || !isTenant) return
+
+    const reset = () => {
+      clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(handleLogout, INACTIVITY_MS)
+    }
+
+    const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart']
+    events.forEach(e => window.addEventListener(e, reset, { passive: true }))
+    reset()
+
+    return () => {
+      clearTimeout(timerRef.current)
+      events.forEach(e => window.removeEventListener(e, reset))
+    }
+  }, [user, isTenant, handleLogout])
 
   if (!ready) return null
   if (!isTenant) return <LandingPage />
