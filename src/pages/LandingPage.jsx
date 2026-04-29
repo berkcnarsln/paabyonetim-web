@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Logo from '../components/Logo'
 import './LandingPage.css'
 
@@ -12,10 +12,10 @@ const features = [
 ]
 
 const stats = [
-  { value: '150+', label: 'Aktif Site' },
-  { value: '6.200+', label: 'Kayıtlı Sakin' },
-  { value: '₺3.8M+', label: 'Aidat Takibi' },
-  { value: '%97', label: 'Memnuniyet' },
+  { target: 150,  prefix: '',  suffix: '+',   label: 'Aktif Site' },
+  { target: 6200, prefix: '',  suffix: '+',   label: 'Kayıtlı Sakin', turkish: true },
+  { target: 3.8,  prefix: '₺', suffix: 'M+', label: 'Aidat Takibi', decimals: 1 },
+  { target: 97,   prefix: '%', suffix: '',    label: 'Memnuniyet' },
 ]
 
 const testimonials = [
@@ -99,6 +99,32 @@ const faqs = [
 export default function LandingPage() {
   const [theme, setTheme] = useState(() => localStorage.getItem('paab_theme') || 'dark')
   const [faqOpen, setFaqOpen] = useState(null)
+  const [counts, setCounts] = useState(stats.map(() => 0))
+  const statsRef = useRef(null)
+  const didAnimate = useRef(false)
+
+  useEffect(() => {
+    const el = statsRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !didAnimate.current) {
+        didAnimate.current = true
+        const duration = 2200
+        const start = performance.now()
+        const tick = (now) => {
+          const p = Math.min((now - start) / duration, 1)
+          const ease = 1 - Math.pow(1 - p, 4)
+          setCounts(stats.map(s =>
+            s.decimals ? +(s.target * ease).toFixed(s.decimals) : Math.round(s.target * ease)
+          ))
+          if (p < 1) requestAnimationFrame(tick)
+        }
+        requestAnimationFrame(tick)
+      }
+    }, { threshold: 0.4 })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark'
@@ -142,10 +168,14 @@ export default function LandingPage() {
       </section>
 
       {/* Stats */}
-      <div className="lp-stats">
-        {stats.map(s => (
+      <div className="lp-stats" ref={statsRef}>
+        {stats.map((s, i) => (
           <div key={s.label} className="lp-stat">
-            <span className="lp-stat-value">{s.value}</span>
+            <span className="lp-stat-value">
+              {s.prefix}
+              {s.turkish ? counts[i].toLocaleString('tr-TR') : counts[i]}
+              {s.suffix}
+            </span>
             <span className="lp-stat-label">{s.label}</span>
           </div>
         ))}

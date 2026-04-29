@@ -133,7 +133,7 @@
 /* ── Tablet (≤768px) ── */
 @media (max-width: 768px) {
   .lp-nav { padding: 16px 20px; }
-  .lp-nav-brand-name { display: none; }
+  .lp-nav-brand-name { font-size: 14px; }
 
   .lp-hero { padding: 60px 24px 80px; }
   .lp-hero-title { font-size: 40px; }
