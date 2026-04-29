@@ -6,8 +6,8 @@ Türkçe apartman/site yönetim SaaS sistemi. Çok kiracılı (multi-tenant) mim
 ## Repolar
 | Repo | Yerel Klasör | GitHub |
 |------|-------------|--------|
-| Frontend (React/Vite) | `C:\Users\beko\Downloads\BAPyonetim\BAPyonetim` | `berkcnarsln/paabyonetim-web` |
-| Backend (Node.js/Express/PostgreSQL) | `C:\Users\beko\Downloads\PaaBYonetim-backend` | `berkcnarsln/paabyonetim-backend` |
+| Frontend (React/Vite) | `C:\Users\beko\Downloads\BAPyonetim\BAPyonetim` | https://github.com/berkcnarsln/paabyonetim-web |
+| Backend (Node.js/Express/PostgreSQL) | `C:\Users\beko\Downloads\PaaBYonetim-backend` | https://github.com/berkcnarsln/paabyonetim-backend |
 
 ## Deployment
 - **Frontend:** GitHub Actions otomatik deploy eder — `main`'e push → build → SCP → `/var/www/paabyonetim` → nginx reload

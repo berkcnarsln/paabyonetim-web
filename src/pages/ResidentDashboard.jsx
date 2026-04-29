@@ -255,41 +255,37 @@ function ArizalarContent({ user }) {
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (!file) return
-    const img = new Image()
-    const url = URL.createObjectURL(file)
-    img.onload = () => {
-      const MAX = 1200
-      let w = img.width, h = img.height
-      if (w > MAX || h > MAX) {
-        if (w > h) { h = Math.round(h * MAX / w); w = MAX }
-        else { w = Math.round(w * MAX / h); h = MAX }
-      }
-      const canvas = document.createElement('canvas')
-      canvas.width = w; canvas.height = h
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h)
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
-      URL.revokeObjectURL(url)
-      setPhoto({ data: dataUrl.split(',')[1], type: 'image/jpeg', preview: dataUrl })
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const dataUrl = ev.target.result
+      setPhoto({ data: dataUrl.split(',')[1], type: file.type, preview: dataUrl })
     }
-    img.src = url
+    reader.readAsDataURL(file)
   }
 
   const bildir = async () => {
     if (!form.konu) return
     setSaving(true)
     try {
-      const { data } = await client.post('/api/repairs', {
+      const payload = {
         building_id: user.building_id || 1,
         apartment_id: user.apartment_id,
         title: form.konu,
         description: form.aciklama,
-        ...(photo && { photo_data: photo.data, photo_type: photo.type }),
-      })
+      }
+      if (photo) {
+        payload.photo_data = photo.data
+        payload.photo_type = photo.type
+      }
+      const { data } = await client.post('/api/repairs', payload)
       setArizalar(prev => [data, ...(prev || [])])
       setForm({ konu: '', aciklama: '' })
       setPhoto(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
-    } catch { alert('Arıza bildirimi gönderilemedi. Fotoğraf çok büyük olabilir, tekrar deneyin.') } finally { setSaving(false) }
+    } catch (err) {
+      const msg = err?.response?.data?.error || err?.message || 'Bilinmeyen hata'
+      alert(`Arıza bildirimi gönderilemedi: ${msg}`)
+    } finally { setSaving(false) }
   }
 
   return (
