@@ -1,17 +1,21 @@
+html { scroll-behavior: smooth; }
 .lp-page { min-height: 100vh; background: var(--bg-page); color: var(--t1); font-family: 'DM Sans', sans-serif; }
 
 /* Navbar */
 .lp-nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 60px; border-bottom: 1px solid var(--border-soft); position: sticky; top: 0; background: var(--bg-page); z-index: 10; }
 .lp-nav-brand { display: flex; align-items: center; gap: 10px; }
 .lp-nav-brand-name { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--t1); letter-spacing: 0.2px; }
+.lp-nav-links { display: flex; align-items: center; gap: 28px; }
 .lp-nav-right { display: flex; align-items: center; gap: 16px; }
-.lp-nav-link { color: var(--t3); font-size: 14px; text-decoration: none; }
+.lp-nav-link { color: var(--t3); font-size: 14px; text-decoration: none; transition: color 0.2s; }
+.lp-nav-link:hover { color: var(--t1); }
 .lp-theme-btn { background: var(--bg-input); border: 1px solid var(--border-strong); border-radius: 8px; font-size: 16px; cursor: pointer; padding: 5px 9px; }
 
 /* Hero */
 .lp-hero { position: relative; overflow: hidden; padding: 100px 60px 120px; text-align: center; display: flex; flex-direction: column; align-items: center; }
 .lp-hero-badge { display: inline-block; background: rgba(59,130,246,0.12); color: #60A5FA; border: 1px solid rgba(59,130,246,0.25); border-radius: 20px; padding: 6px 16px; font-size: 13px; font-weight: 600; margin-bottom: 24px; letter-spacing: 0.3px; }
 .lp-hero-title { font-family: 'Playfair Display', serif; font-size: 72px; font-weight: 800; line-height: 1.15; margin-bottom: 24px; color: var(--t1); position: relative; z-index: 1; }
+.lp-hero-gradient { background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 60%, #34D399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .lp-hero-sub { font-size: 18px; color: var(--t3); line-height: 1.7; margin-bottom: 40px; position: relative; z-index: 1; }
 .lp-hero-actions { display: flex; gap: 16px; position: relative; z-index: 1; flex-wrap: wrap; justify-content: center; }
 .lp-blob1 { position: absolute; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%); top: -150px; right: -150px; pointer-events: none; }
@@ -68,7 +72,8 @@
 .lp-section-title { font-family: 'Syne', sans-serif; font-size: 40px; font-weight: 700; color: var(--t1); margin-bottom: 12px; }
 .lp-section-sub { font-size: 16px; color: var(--t3); }
 .lp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.lp-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
+.lp-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.lp-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
 .lp-card-icon { font-size: 28px; margin-bottom: 16px; }
 .lp-card-title { font-size: 17px; font-weight: 700; color: var(--t1); margin-bottom: 8px; font-family: 'Syne', sans-serif; }
 .lp-card-desc { font-size: 14px; color: var(--t3); line-height: 1.6; }
@@ -82,7 +87,8 @@
 
 /* Testimonials */
 .lp-testimonials { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.lp-testimonial { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px; display: flex; flex-direction: column; gap: 24px; }
+.lp-testimonial { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px; display: flex; flex-direction: column; gap: 24px; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.lp-testimonial:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
 .lp-testimonial-quote { font-size: 15px; color: var(--t2); line-height: 1.75; flex: 1; margin: 0; }
 .lp-testimonial-author { display: flex; align-items: center; gap: 14px; }
 .lp-testimonial-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #3B82F6, #2563EB); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
@@ -91,7 +97,8 @@
 
 /* Pricing */
 .lp-pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: start; }
-.lp-plan { background: var(--bg-page); border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px; position: relative; display: flex; flex-direction: column; gap: 20px; }
+.lp-plan { background: var(--bg-page); border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px; position: relative; display: flex; flex-direction: column; gap: 20px; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.lp-plan:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
 .lp-plan.highlight { border-color: #3B82F6; box-shadow: 0 0 0 1px #3B82F6; }
 .lp-plan-badge { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff; font-size: 12px; font-weight: 700; padding: 4px 14px; border-radius: 20px; white-space: nowrap; }
 .lp-plan-tag { display: inline-block; background: rgba(16,185,129,0.12); color: #10B981; border: 1px solid rgba(16,185,129,0.25); border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; }
@@ -128,12 +135,19 @@
 /* Footer */
 .lp-footer { display: flex; align-items: center; justify-content: space-between; padding: 28px 60px; border-top: 1px solid var(--border-soft); }
 .lp-footer-text { font-size: 13px; color: var(--t4); }
-.lp-footer-link { font-size: 13px; color: var(--t3); text-decoration: none; }
+.lp-footer-links { display: flex; align-items: center; gap: 20px; }
+.lp-footer-link { font-size: 13px; color: var(--t3); text-decoration: none; transition: color 0.2s; }
+.lp-footer-link:hover { color: var(--t1); }
+
+/* WhatsApp floating button */
+.lp-whatsapp-btn { position: fixed; bottom: 28px; right: 28px; width: 56px; height: 56px; background: #25D366; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 4px 20px rgba(37,211,102,0.4); z-index: 100; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.lp-whatsapp-btn:hover { transform: scale(1.1); box-shadow: 0 8px 28px rgba(37,211,102,0.5); }
 
 /* ── Tablet (≤768px) ── */
 @media (max-width: 768px) {
   .lp-nav { padding: 16px 20px; }
   .lp-nav-brand-name { font-size: 14px; }
+  .lp-nav-links { display: none; }
 
   .lp-hero { padding: 60px 24px 80px; }
   .lp-hero-title { font-size: 40px; }
@@ -168,6 +182,8 @@
   .lp-cta-title { font-size: 28px; }
 
   .lp-footer { flex-direction: column; gap: 12px; padding: 24px 20px; text-align: center; }
+  .lp-footer-links { flex-direction: column; gap: 8px; }
+  .lp-whatsapp-btn { bottom: 20px; right: 20px; width: 50px; height: 50px; }
 }
 
 /* ── Mobile (≤480px) ── */
