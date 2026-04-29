@@ -504,7 +504,10 @@ function ArizalarContent({ buildingId }) {
                       src={`data:${a.photo_type};base64,${a.photo_data}`}
                       alt="fotoğraf"
                       style={{ width: 52, height: 52, objectFit: 'cover', borderRadius: '6px', cursor: 'pointer' }}
-                      onClick={() => window.open(`data:${a.photo_type};base64,${a.photo_data}`, '_blank')}
+                      onClick={() => {
+                        const blob = new Blob([Uint8Array.from(atob(a.photo_data), c => c.charCodeAt(0))], { type: a.photo_type })
+                        window.open(URL.createObjectURL(blob), '_blank')
+                      }}
                     />
                   : <span style={{ color: '#475569', fontSize: '12px' }}>—</span>
                 }
