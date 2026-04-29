@@ -10,10 +10,25 @@ Türkçe apartman/site yönetim SaaS sistemi. Çok kiracılı (multi-tenant) mim
 | Backend (Node.js/Express/PostgreSQL) | `C:\Users\beko\Downloads\PaaBYonetim-backend` | https://github.com/berkcnarsln/paabyonetim-backend |
 
 ## Deployment
-- **Frontend:** GitHub Actions otomatik deploy eder — `main`'e push → build → SCP → `/var/www/paabyonetim` → nginx reload
-- **Backend:** Manuel — sunucuda `cd /opt/paabyonetim && git pull` + `docker restart` veya `nginx -s reload`
-- **Sunucu:** `root@paabhost`, SSH ile bağlanılıyor
-- **Docker:** `docker exec paabyonetim-nginx nginx -s reload`, `docker exec paabyonetim-api ...`
+- **Frontend:** GitHub Actions otomatik — `main`'e push → build → SCP → `/var/www/paabyonetim` → nginx reload
+- **Backend:** Manuel — sunucuda git pull + docker cp + docker restart
+- **Sunucu:** `root@paabhost`, `/opt/paabyonetim/`
+- **Önemli:** Backend Docker image'ı `build: .` ile oluşturuluyor. `git pull` tek başına yetmez, dosyaları `docker cp` ile container'a kopyalayıp `docker restart paabyonetim-api` yapmak gerekiyor.
+
+## Sunucuda Backend Güncelleme Komutu (Her Seferinde)
+```bash
+cd /opt/paabyonetim && git pull
+docker cp src/routes/DOSYA.js paabyonetim-api:/app/src/routes/DOSYA.js
+docker restart paabyonetim-api
+```
+
+## Nginx
+```bash
+# Config güncellendiyse:
+docker exec paabyonetim-nginx nginx -s reload
+# NOT: nginx.ssl.conf aktif olan config. nginx.conf'a kopyalanmış durumda:
+# cp nginx/nginx.ssl.conf nginx/nginx.conf
+```
 
 ## Tech Stack
 - Frontend: React 18 + Vite, inline style objeler (`const s = {...}`)
@@ -31,70 +46,62 @@ src/
     ResidentDashboard.jsx     — sakin paneli (tüm modüller tek dosyada)
     Login.jsx
   components/
-    Sidebar.jsx               — navigasyon, şifre değiştir modal
+    Sidebar.jsx               — navigasyon (height:100vh, overflowY:auto — scroll çalışır)
     Logo.jsx                  — SVG logo, hideText prop'u var
   api/
     client.js                 — axios instance, subdomain → X-Tenant header
-```
-
-## Önemli Kararlar ve Geçmiş Değişiklikler
-
-### Session Timeout
-- 5 dakika inaktivite → otomatik çıkış
-- Sayfa yenilenince de kontrol eder (`paab_last_active` localStorage)
-- `App.jsx`'te `INACTIVITY_MS = 5 * 60 * 1000`
-
-### Fotoğraf Yükleme (Arızalar)
-- Frontend: canvas ile sıkıştırılıyor (max 1200px, %80 JPEG kalitesi, ~200-400KB)
-- Base64 olarak gönderiliyor: `photo_data` (string), `photo_type` (mime)
-- Backend: `repairs` tablosunda `photo_data TEXT`, `photo_type VARCHAR(100)` kolonları var (migration 004)
-- nginx `client_max_body_size 15m` — önemli, default 1MB yetersizdi
-
-### PDF Rapor
-- `RaporlarContent`'te "Yazdır / PDF" butonu popup pencere açıyor
-- Beyaz arka planlı temiz HTML, `window.print()` otomatik tetikleniyor
-- Dark tema değil, yazdırmaya uygun
-
-### Landing Page
-- `/` (subdomain yok) → LandingPage gösterilir
-- Stats count-up animasyonu (IntersectionObserver)
-- Sürüklenebilir testimonials carousel (scroll-snap yok, mouse drag)
-- Fiyatlandırma: daire başı (Başlangıç ₺15/daire max 15, Pro ₺35/daire)
-- WhatsApp butonu (numara henüz eklenmedi: `https://wa.me/90XXXXXXXXXX`)
-
-### Nginx (nginx.ssl.conf)
-- `*.paabyonetim.com` wildcard SSL
-- `api.paabyonetim.com` → Docker API container'a proxy
-- JS/CSS dosyaları 1 yıl cache (`Cache-Control: immutable`) — Vite hash'li dosya isimleri sayesinde sorun olmaz
-- `client_max_body_size 15m` eklendi (fotoğraf yükleme için)
-
-## Sık Kullanılan Komutlar (Sunucuda)
-
-```bash
-# Backend pull + nginx reload
-cd /opt/paabyonetim && git pull
-docker exec paabyonetim-nginx nginx -s reload
-
-# Migration çalıştır
-docker exec paabyonetim-api node -e "
-  const db=require('./src/db');
-  db.query('SQL BURAYA').then(()=>{console.log('OK');process.exit(0)})
-"
-
-# Container logları
-docker logs paabyonetim-api --tail 50
-docker logs paabyonetim-nginx --tail 20
 ```
 
 ## Veritabanı Önemli Tablolar
 - `buildings` — `subdomain` kolonu ile tenant tanımlama
 - `apartments` — `building_id`, `unit_number`, `block`
 - `users` — `role` (admin/resident), `building_id`, `apartment_id`
-- `repairs` — `photo_data TEXT`, `photo_type VARCHAR(100)` (migration 004 ile eklendi)
-- `payments`, `expenses`, `announcements`, `surveys`, `reservations`, `visitors`, `documents`, `messages`, `staff`, `maintenance_tasks`
+- `payments` — **`building_id` YOK**, `apartment_id` var → JOIN gerekir
+- `repairs` — `photo_data TEXT`, `photo_type VARCHAR(100)` (migration 004 ile eklendi, sunucuda çalıştırıldı)
+- `expenses`, `announcements`, `repairs` — `building_id` var
 
-## Bilinen Sorunlar / Dikkat Edilecekler
-- Backend'in GitHub Actions'ı yok, her değişiklik için sunucuya manuel git pull gerekiyor
-- `src/app.js`, `src/routes/` altında commit edilmemiş dosyalar var (sunucuda çalışıyor ama repoda yok)
-- WhatsApp numarası placeholder (`90XXXXXXXXXX`)
+---
+
+## Şimdiye Kadar Yapılanlar (Özet)
+
+### Landing Page (paabyonetim.com)
+- Hero başlık: "Apartmanınızı güvenle yönetin." — Playfair Display font, "güvenle" kelimesi gradient
+- Stats bölümü: 0'dan hedef sayıya count-up animasyonu (IntersectionObserver)
+- Dashboard mockup bölümü
+- Testimonials: 7 yorum, yatay sürüklenebilir carousel (scroll-snap YOK, mouse drag)
+- Fiyatlandırma: daire başı — Başlangıç ₺15/daire (max 15), Pro ₺35/daire, Kurumsal custom
+- Başlangıç planında "İlk 30 gün ücretsiz" badge
+- SSS accordion
+- Navbar: sol logo + "PAAB Yönetim" yazısı, sağda Özellikler/Fiyatlar/SSS/İletişim
+- WhatsApp butonu (numara henüz eklenmedi: `https://wa.me/90XXXXXXXXXX`)
+- Footer: Gizlilik Politikası, KVKK linkleri
+
+### Oturum Güvenliği
+- 5 dakika inaktivite → otomatik çıkış
+- Sayfa yenilenince de son aktivite kontrolü (`paab_last_active` localStorage)
+
+### Fotoğraf Yükleme (Arızalar) — TAMAMLANDI ✓
+- **ResidentDashboard:** Arıza formuna "📎 Fotoğraf Ekle" butonu, önizleme, FileReader ile base64
+- Gönderide `photo_data` ve `photo_type` backend'e iletiliyor
+- Tabloda "Fotoğraf" sütunu — thumbnail'a tıklayınca Blob URL ile tam boyut açılıyor
+- **AdminDashboard:** Arıza tablosunda aynı şekilde fotoğraf sütunu
+- **Backend:** `repairs.js` POST endpoint photo_data/photo_type destekliyor
+- **nginx:** `client_max_body_size 15m` (default 1MB yetmiyordu)
+- **DB:** `photo_data TEXT`, `photo_type VARCHAR(100)` kolonları mevcut
+
+### PDF Rapor (Raporlar) — TAMAMLANDI ✓
+- AdminDashboard → Raporlar sayfası (sidebar'da en altta, scroll edince görünür)
+- Dönem seçimi (ay/yıl) → API'den veri yükleniyor
+- "Yazdır / PDF" butonu: Blob URL ile temiz beyaz popup açılıyor
+- Popup içeriği: PAAB Yönetim logosu + başlık, dönem bilgisi, gelir/gider/bakiye kartları, aidat durumu, gider kategorileri, arıza özeti, duyuru sayısı
+- Auto-print tetikleniyor
+- **Backend:** `reports.js` — payments JOIN ile (`payments` tablosunda `building_id` yok!)
+
+---
+
+## Bilinen Kısıtlamalar / Dikkat Edilecekler
+- Backend'in GitHub Actions'ı yok — her değişiklik için sunucuda manuel `git pull + docker cp + docker restart` gerekiyor
+- `payments` tablosunda `building_id` yok, `apartment_id` var — bu tabloya bina bazlı sorgu yaparken `JOIN apartments` kullanılmalı
+- WhatsApp numarası placeholder (`90XXXXXXXXXX`) — ileride değiştirilecek
 - Landing page stats verileri placeholder
+- nginx.ssl.conf aktif config olarak nginx.conf'a kopyalanmış durumda (`cp nginx/nginx.ssl.conf nginx/nginx.conf`)
