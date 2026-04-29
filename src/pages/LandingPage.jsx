@@ -42,18 +42,18 @@ const testimonials = [
 const plans = [
   {
     name: 'Başlangıç',
-    price: '₺25',
+    price: '₺15',
     period: '/ daire / ay',
-    note: 'En fazla 20 daire',
+    note: 'En fazla 15 daire',
     tag: 'İlk 30 gün ücretsiz',
     desc: 'Küçük siteler için ideal başlangıç.',
-    features: ['20 daireye kadar', 'Aidat takibi', 'Duyurular', 'Arıza bildirimleri', 'E-posta desteği'],
+    features: ['15 daireye kadar', 'Aidat takibi', 'Duyurular', 'Arıza bildirimleri', 'E-posta desteği'],
     cta: 'Ücretsiz Başla',
     highlight: false,
   },
   {
     name: 'Pro',
-    price: '₺25',
+    price: '₺35',
     period: '/ daire / ay',
     note: 'Sınırsız daire',
     desc: 'Büyüdükçe birlikte büyüyoruz.',
@@ -293,8 +293,8 @@ export default function LandingPage() {
             <p className="lp-section-sub">Gizli ücret yok. İstediğiniz zaman iptal.</p>
           </div>
           <div className="lp-pricing-note">
-            Ödediğiniz kadar ödersiniz — daire sayınıza göre otomatik hesaplanır.
-            <span className="lp-pricing-example">Örn: 40 daire × ₺25 = <strong>₺1.000 / ay</strong></span>
+            Daire sayınıza göre, adil fiyatlandırma — ne kadar kullanırsanız o kadar ödersiniz.
+            <span className="lp-pricing-example">Örn: 40 daire × ₺35 = <strong>₺1.400 / ay</strong></span>
           </div>
           <div className="lp-pricing">
             {plans.map(p => (
