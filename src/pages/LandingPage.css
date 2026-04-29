@@ -86,9 +86,9 @@ html { scroll-behavior: smooth; }
 
 /* Testimonials */
 .lp-testimonials-wrapper { position: relative; }
-.lp-testimonials-track { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; cursor: grab; user-select: none; }
+.lp-testimonials-track { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; cursor: grab; user-select: none; }
 .lp-testimonials-track::-webkit-scrollbar { display: none; }
-.lp-testimonial { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px; display: flex; flex-direction: column; gap: 24px; transition: transform 0.2s ease, box-shadow 0.2s ease; flex: 0 0 340px; scroll-snap-align: start; }
+.lp-testimonial { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px; display: flex; flex-direction: column; gap: 24px; transition: transform 0.2s ease, box-shadow 0.2s ease; flex: 0 0 340px; }
 .lp-testimonial:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
 .lp-carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border); color: var(--t1); font-size: 24px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; transition: background 0.2s, box-shadow 0.2s; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
 .lp-carousel-btn:hover { background: var(--border-strong); box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
