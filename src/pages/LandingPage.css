@@ -85,12 +85,15 @@ html { scroll-behavior: smooth; }
 .lp-step-desc { font-size: 14px; color: var(--t3); line-height: 1.6; }
 
 /* Testimonials */
-.lp-testimonials-track { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 12px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; cursor: grab; }
-.lp-testimonials-track::-webkit-scrollbar { height: 4px; }
-.lp-testimonials-track::-webkit-scrollbar-track { background: var(--border-soft); border-radius: 4px; }
-.lp-testimonials-track::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+.lp-testimonials-wrapper { position: relative; }
+.lp-testimonials-track { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; cursor: grab; user-select: none; }
+.lp-testimonials-track::-webkit-scrollbar { display: none; }
 .lp-testimonial { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px; display: flex; flex-direction: column; gap: 24px; transition: transform 0.2s ease, box-shadow 0.2s ease; flex: 0 0 340px; scroll-snap-align: start; }
 .lp-testimonial:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
+.lp-carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border); color: var(--t1); font-size: 24px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; transition: background 0.2s, box-shadow 0.2s; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+.lp-carousel-btn:hover { background: var(--border-strong); box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+.lp-carousel-prev { left: -22px; }
+.lp-carousel-next { right: -22px; }
 .lp-testimonial-quote { font-size: 15px; color: var(--t2); line-height: 1.75; flex: 1; margin: 0; }
 .lp-testimonial-author { display: flex; align-items: center; gap: 14px; }
 .lp-testimonial-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #3B82F6, #2563EB); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
@@ -175,6 +178,7 @@ html { scroll-behavior: smooth; }
   .lp-steps { grid-template-columns: 1fr; gap: 16px; }
 
   .lp-testimonial { flex: 0 0 280px; padding: 24px 20px; }
+  .lp-carousel-btn { display: none; }
 
   .lp-pricing { grid-template-columns: 1fr; }
 

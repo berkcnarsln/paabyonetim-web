@@ -126,6 +126,26 @@ export default function LandingPage() {
   const [counts, setCounts] = useState(stats.map(() => 0))
   const statsRef = useRef(null)
   const didAnimate = useRef(false)
+  const testimonialRef = useRef(null)
+  const dragState = useRef({ active: false, startX: 0, scrollLeft: 0 })
+
+  const onDragStart = (e) => {
+    dragState.current = { active: true, startX: e.pageX - testimonialRef.current.offsetLeft, scrollLeft: testimonialRef.current.scrollLeft }
+    testimonialRef.current.style.cursor = 'grabbing'
+  }
+  const onDragMove = (e) => {
+    if (!dragState.current.active) return
+    e.preventDefault()
+    const x = e.pageX - testimonialRef.current.offsetLeft
+    testimonialRef.current.scrollLeft = dragState.current.scrollLeft - (x - dragState.current.startX) * 1.2
+  }
+  const onDragEnd = () => {
+    dragState.current.active = false
+    if (testimonialRef.current) testimonialRef.current.style.cursor = 'grab'
+  }
+  const scrollCarousel = (dir) => {
+    testimonialRef.current.scrollBy({ left: dir * 360, behavior: 'smooth' })
+  }
 
   useEffect(() => {
     const el = statsRef.current
@@ -326,19 +346,30 @@ export default function LandingPage() {
           <h2 className="lp-section-title">Kullanıcılarımız ne diyor?</h2>
           <p className="lp-section-sub">Gerçek site yöneticileri ve sakinlerden.</p>
         </div>
-        <div className="lp-testimonials-track">
-          {testimonials.map(t => (
-            <div key={t.name} className="lp-testimonial">
-              <p className="lp-testimonial-quote">"{t.quote}"</p>
-              <div className="lp-testimonial-author">
-                <div className="lp-testimonial-avatar">{t.avatar}</div>
-                <div>
-                  <div className="lp-testimonial-name">{t.name}</div>
-                  <div className="lp-testimonial-role">{t.role}</div>
+        <div className="lp-testimonials-wrapper">
+          <button className="lp-carousel-btn lp-carousel-prev" onClick={() => scrollCarousel(-1)} aria-label="Önceki">‹</button>
+          <div
+            className="lp-testimonials-track"
+            ref={testimonialRef}
+            onMouseDown={onDragStart}
+            onMouseMove={onDragMove}
+            onMouseUp={onDragEnd}
+            onMouseLeave={onDragEnd}
+          >
+            {testimonials.map(t => (
+              <div key={t.name} className="lp-testimonial">
+                <p className="lp-testimonial-quote">"{t.quote}"</p>
+                <div className="lp-testimonial-author">
+                  <div className="lp-testimonial-avatar">{t.avatar}</div>
+                  <div>
+                    <div className="lp-testimonial-name">{t.name}</div>
+                    <div className="lp-testimonial-role">{t.role}</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <button className="lp-carousel-btn lp-carousel-next" onClick={() => scrollCarousel(1)} aria-label="Sonraki">›</button>
         </div>
       </section>
 
