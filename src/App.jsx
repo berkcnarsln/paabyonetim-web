@@ -5,7 +5,7 @@ import ResidentDashboard from './pages/ResidentDashboard'
 import LandingPage from './pages/LandingPage'
 import { getSubdomain } from './api/client'
 
-const INACTIVITY_MS = 15 * 60 * 1000 // 15 dakika
+const INACTIVITY_MS = 5 * 60 * 1000 // 5 dakika
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -20,7 +20,17 @@ export default function App() {
 
   useEffect(() => {
     const saved = localStorage.getItem('paab_user')
-    if (saved) setUser(JSON.parse(saved))
+    if (saved) {
+      const lastActive = localStorage.getItem('paab_last_active')
+      const expired = !lastActive || (Date.now() - parseInt(lastActive)) > INACTIVITY_MS
+      if (expired) {
+        localStorage.removeItem('paab_token')
+        localStorage.removeItem('paab_user')
+        localStorage.removeItem('paab_last_active')
+      } else {
+        setUser(JSON.parse(saved))
+      }
+    }
     const theme = localStorage.getItem('paab_theme') || 'dark'
     document.documentElement.setAttribute('data-theme', theme)
     setReady(true)
@@ -29,12 +39,14 @@ export default function App() {
   const handleLogin = (userData, token) => {
     localStorage.setItem('paab_token', token)
     localStorage.setItem('paab_user', JSON.stringify(userData))
+    localStorage.setItem('paab_last_active', Date.now().toString())
     setUser(userData)
   }
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem('paab_token')
     localStorage.removeItem('paab_user')
+    localStorage.removeItem('paab_last_active')
     setUser(null)
   }, [])
 
@@ -43,6 +55,7 @@ export default function App() {
     if (!user || !isTenant) return
 
     const reset = () => {
+      localStorage.setItem('paab_last_active', Date.now().toString())
       clearTimeout(timerRef.current)
       timerRef.current = setTimeout(handleLogout, INACTIVITY_MS)
     }
