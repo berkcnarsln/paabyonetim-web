@@ -1594,8 +1594,11 @@ function RaporlarContent({ buildingId }) {
     const html = `<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><title>Aylık Rapor — ${label}</title><style>
       *{margin:0;padding:0;box-sizing:border-box}
       body{font-family:'DM Sans',Arial,sans-serif;color:#1E293B;padding:32px;background:#fff}
-      h1{font-size:22px;font-weight:800;margin-bottom:4px}
-      .sub{color:#64748B;font-size:14px;margin-bottom:28px}
+      .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:16px;border-bottom:2px solid #E2E8F0}
+      .logo-wrap{display:flex;align-items:center;gap:12px}
+      .logo-name{font-family:Georgia,serif;font-size:20px;font-weight:800;color:#1E293B;letter-spacing:0.5px}
+      .logo-sub{font-size:11px;color:#64748B;margin-top:2px}
+      .period-badge{font-size:13px;color:#64748B;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:6px 14px}
       .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
       .stat{border:1px solid #E2E8F0;border-radius:10px;padding:16px;text-align:center}
       .stat-val{font-size:26px;font-weight:800}
@@ -1609,10 +1612,23 @@ function RaporlarContent({ buildingId }) {
       .ann{text-align:center;padding:28px}
       .ann .big{font-size:36px;font-weight:800;color:#1E293B}
       .ann .lbl{font-size:13px;color:#64748B;margin-top:4px}
-      @media print{body{padding:16px}}
+      @media print{body{padding:16px}@page{margin:10mm}}
     </style></head><body>
-      <h1>Aylık Yönetim Raporu</h1>
-      <div class="sub">${label} · ${data.apartments.total} Daire</div>
+      <div class="header">
+        <div class="logo-wrap">
+          <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1.5" y="1.5" width="37" height="37" rx="9" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="2"/>
+            <line x1="8" y1="10" x2="32" y2="10" stroke="#3B82F6" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="8" y1="14" x2="26" y2="14" stroke="#3B82F6" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
+            <text x="20" y="31" text-anchor="middle" fill="#3B82F6" font-size="11.5" font-family="monospace" font-weight="700">&lt;/&gt;</text>
+          </svg>
+          <div>
+            <div class="logo-name">PAAB Yönetim</div>
+            <div class="logo-sub">Aylık Yönetim Raporu</div>
+          </div>
+        </div>
+        <div class="period-badge">${label} · ${data.apartments.total} Daire</div>
+      </div>
       <div class="stats">
         <div class="stat"><div class="stat-val green">₺${(data.payments.total_income || 0).toLocaleString('tr-TR')}</div><div class="stat-lbl">Toplam Gelir</div></div>
         <div class="stat"><div class="stat-val red">₺${(data.expenses.total || 0).toLocaleString('tr-TR')}</div><div class="stat-lbl">Toplam Gider</div></div>
@@ -1630,8 +1646,8 @@ function RaporlarContent({ buildingId }) {
       </div>
       <script>window.onload=()=>{window.print();setTimeout(()=>window.close(),1000)}<\/script>
     </body></html>`
-    const w = window.open('', '_blank', 'width=900,height=700')
-    if (w) { w.document.write(html); w.document.close() }
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+    window.open(URL.createObjectURL(blob), '_blank', 'width=900,height=700')
   }
 
   const months = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
