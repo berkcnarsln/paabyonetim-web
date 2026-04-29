@@ -255,11 +255,23 @@ function ArizalarContent({ user }) {
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      setPhoto({ data: ev.target.result.split(',')[1], type: file.type, preview: ev.target.result })
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      const MAX = 1200
+      let w = img.width, h = img.height
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX }
+        else { w = Math.round(w * MAX / h); h = MAX }
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
+      URL.revokeObjectURL(url)
+      setPhoto({ data: dataUrl.split(',')[1], type: 'image/jpeg', preview: dataUrl })
     }
-    reader.readAsDataURL(file)
+    img.src = url
   }
 
   const bildir = async () => {
@@ -277,7 +289,7 @@ function ArizalarContent({ user }) {
       setForm({ konu: '', aciklama: '' })
       setPhoto(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
-    } catch { } finally { setSaving(false) }
+    } catch { alert('Arıza bildirimi gönderilemedi. Fotoğraf çok büyük olabilir, tekrar deneyin.') } finally { setSaving(false) }
   }
 
   return (
