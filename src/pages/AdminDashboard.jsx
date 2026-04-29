@@ -16,18 +16,32 @@ export default function AdminDashboard({ user, onLogout, tenantName }) {
 
   const renderContent = () => {
     switch (activePage) {
-      case 'dashboard': return <DashboardContent buildingId={buildingId} />
-      case 'aidatlar': return <AidatlarContent buildingId={buildingId} />
-      case 'daireler': return <DairelerContent buildingId={buildingId} />
-      case 'duyurular': return <DuyurularContent buildingId={buildingId} />
-      case 'arizalar': return <ArizalarContent buildingId={buildingId} />
-      case 'giderler': return <GiderlerContent buildingId={buildingId} />
-      case 'kullanicilar': return <KullanicilarContent buildingId={buildingId} />
+      case 'dashboard':   return <DashboardContent buildingId={buildingId} />
+      case 'aidatlar':    return <AidatlarContent buildingId={buildingId} />
+      case 'daireler':    return <DairelerContent buildingId={buildingId} />
+      case 'duyurular':   return <DuyurularContent buildingId={buildingId} />
+      case 'arizalar':    return <ArizalarContent buildingId={buildingId} />
+      case 'giderler':    return <GiderlerContent buildingId={buildingId} />
+      case 'kullanicilar':return <KullanicilarContent buildingId={buildingId} />
+      case 'bakim':       return <BakimContent buildingId={buildingId} />
+      case 'belgeler':    return <BelgelerContent buildingId={buildingId} isAdmin />
+      case 'anket':       return <AnketContent buildingId={buildingId} user={user} isAdmin />
+      case 'rezervasyon': return <RezervasyonContent buildingId={buildingId} user={user} isAdmin />
+      case 'ziyaretci':   return <ZiyaretciContent buildingId={buildingId} isAdmin />
+      case 'personel':    return <PersonelContent buildingId={buildingId} />
+      case 'mesajlar':    return <MesajlarContent buildingId={buildingId} user={user} isAdmin />
+      case 'raporlar':    return <RaporlarContent buildingId={buildingId} />
       default: return <DashboardContent buildingId={buildingId} />
     }
   }
 
-  const titles = { dashboard: 'Genel Bakış', aidatlar: 'Aidat Yönetimi', daireler: 'Daireler', duyurular: 'Duyurular', arizalar: 'Arıza Takibi', giderler: 'Gider Yönetimi', kullanicilar: 'Kullanıcı Yönetimi' }
+  const titles = {
+    dashboard: 'Genel Bakış', aidatlar: 'Aidat Yönetimi', daireler: 'Daireler',
+    duyurular: 'Duyurular', arizalar: 'Arıza Takibi', giderler: 'Gider Yönetimi',
+    kullanicilar: 'Kullanıcı Yönetimi', bakim: 'Bakım Takvimi', belgeler: 'Belgeler',
+    anket: 'Anketler', rezervasyon: 'Ortak Alan Rezervasyonu', ziyaretci: 'Ziyaretçi Takibi',
+    personel: 'Personel Yönetimi', mesajlar: 'Mesajlar', raporlar: 'Aylık Raporlar',
+  }
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -475,7 +489,7 @@ function ArizalarContent({ buildingId }) {
     <div style={s.card}>
       <h3 style={{ ...s.cardTitle, marginBottom: '20px' }}>Arıza Bildirimleri</h3>
       <table style={s.table}>
-        <thead><tr>{['No', 'Konu', 'Daire', 'Daire Sahibi', 'Tarih', 'Durum'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
+        <thead><tr>{['No', 'Konu', 'Fotoğraf', 'Daire', 'Daire Sahibi', 'Tarih', 'Durum'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
         <tbody>
           {(repairs || []).map(a => (
             <tr key={a.id} style={s.tr}>
@@ -483,6 +497,17 @@ function ArizalarContent({ buildingId }) {
               <td style={s.td}>
                 <p style={{ color: '#E2E8F0', fontWeight: '500' }}>{a.title}</p>
                 {a.description && <p style={{ fontSize: '12px', color: '#64748B', marginTop: '3px' }}>{a.description}</p>}
+              </td>
+              <td style={s.td}>
+                {a.photo_data
+                  ? <img
+                      src={`data:${a.photo_type};base64,${a.photo_data}`}
+                      alt="fotoğraf"
+                      style={{ width: 52, height: 52, objectFit: 'cover', borderRadius: '6px', cursor: 'pointer' }}
+                      onClick={() => window.open(`data:${a.photo_type};base64,${a.photo_data}`, '_blank')}
+                    />
+                  : <span style={{ color: '#475569', fontSize: '12px' }}>—</span>
+                }
               </td>
               <td style={s.td}><span style={s.daireBadge}>{a.block ? `${a.block}-${a.unit_number}` : (a.unit_number || 'Genel')}</span></td>
               <td style={s.td}>{a.reported_by_name || '-'}</td>
@@ -794,6 +819,896 @@ const s = {
   duyuruBaslik:{ fontSize: '14px', fontWeight: '600', color: 'var(--t1)' },
   duyuruTarih: { fontSize: '12px', color: 'var(--t5)' },
   duyuruIcerik:{ fontSize: '13px', color: 'var(--t4)', marginTop: '6px', lineHeight: 1.5 },
-  btnPrimary: { background: 'linear-gradient(135deg, #3B82F6, #2563EB)', border: 'none', borderRadius: '8px', padding: '10px 18px', color: '#fff', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' },
-  input:      { width: '100%', background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: '8px', padding: '12px 14px', color: 'var(--t1)', fontSize: '14px', outline: 'none', fontFamily: 'DM Sans, sans-serif', display: 'block', boxSizing: 'border-box' },
+  btnPrimary:  { background: 'linear-gradient(135deg, #3B82F6, #2563EB)', border: 'none', borderRadius: '8px', padding: '10px 18px', color: '#fff', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' },
+  btnDanger:   { background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '8px 14px', color: '#EF4444', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' },
+  btnSecondary:{ background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: '8px', padding: '8px 14px', color: 'var(--t3)', fontSize: '13px', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' },
+  input:       { width: '100%', background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: '8px', padding: '12px 14px', color: 'var(--t1)', fontSize: '14px', outline: 'none', fontFamily: 'DM Sans, sans-serif', display: 'block', boxSizing: 'border-box' },
+  formRow:     { display: 'flex', gap: '12px', flexWrap: 'wrap' },
+  label:       { fontSize: '12px', color: 'var(--t4)', fontWeight: '600', marginBottom: '6px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.4px' },
+  modalOverlay:{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300 },
+  modal:       { background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '28px', width: '480px', maxHeight: '90vh', overflowY: 'auto' },
+  modalTitle:  { fontFamily: 'Syne, sans-serif', fontSize: '18px', fontWeight: '700', color: 'var(--t1)', marginBottom: '20px' },
+  statusBadge: { padding: '3px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '500' },
+}
+
+// ─── YARDIMCI ────────────────────────────────────────────────────────────────
+function Modal({ title, onClose, children }) {
+  return (
+    <div style={s.modalOverlay} onClick={onClose}>
+      <div style={s.modal} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h3 style={{ ...s.modalTitle, marginBottom: 0 }}>{title}</h3>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--t4)', cursor: 'pointer', fontSize: '20px' }}>✕</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function FormField({ label, children }) {
+  return (
+    <div style={{ marginBottom: '14px' }}>
+      <label style={s.label}>{label}</label>
+      {children}
+    </div>
+  )
+}
+
+function StatusPill({ status, map }) {
+  const def = map[status] || { bg: 'rgba(100,116,139,0.12)', color: '#94A3B8' }
+  return <span style={{ ...s.statusBadge, background: def.bg, color: def.color }}>{def.label || status}</span>
+}
+
+// ─── BAKIM TAKVİMİ ───────────────────────────────────────────────────────────
+function BakimContent({ buildingId }) {
+  const [list, setList] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+  const [editItem, setEditItem] = useState(null)
+  const [form, setForm] = useState({ title: '', description: '', category: 'genel', scheduled_date: '', notes: '' })
+
+  const load = () => {
+    setLoading(true)
+    client.get(`/api/maintenance?building_id=${buildingId}`)
+      .then(r => setList(r.data)).catch(() => {}).finally(() => setLoading(false))
+  }
+  useEffect(load, [])
+
+  const openAdd = () => { setForm({ title: '', description: '', category: 'genel', scheduled_date: '', notes: '' }); setEditItem(null); setShowModal(true) }
+  const openEdit = item => { setForm({ title: item.title, description: item.description || '', category: item.category, scheduled_date: item.scheduled_date?.split('T')[0] || '', notes: item.notes || '' }); setEditItem(item); setShowModal(true) }
+
+  const save = async () => {
+    if (!form.title || !form.scheduled_date) return
+    try {
+      if (editItem) await client.put(`/api/maintenance/${editItem.id}`, { ...form, building_id: buildingId })
+      else await client.post('/api/maintenance', { ...form, building_id: buildingId })
+      setShowModal(false); load()
+    } catch {}
+  }
+
+  const updateStatus = async (id, status) => {
+    await client.put(`/api/maintenance/${id}`, { status, completed_date: status === 'tamamlandi' ? new Date().toISOString().split('T')[0] : null })
+    load()
+  }
+
+  const del = async id => { if (confirm('Silinsin mi?')) { await client.delete(`/api/maintenance/${id}`); load() } }
+
+  const statusMap = {
+    bekliyor:    { bg: 'rgba(245,158,11,0.12)', color: '#F59E0B', label: 'Bekliyor' },
+    tamamlandi:  { bg: 'rgba(16,185,129,0.12)', color: '#10B981', label: 'Tamamlandı' },
+    ertelendi:   { bg: 'rgba(239,68,68,0.12)',  color: '#EF4444', label: 'Ertelendi' },
+  }
+
+  const categories = ['genel', 'asansör', 'yangın tüpü', 'elektrik', 'su', 'ısıtma', 'bahçe', 'güvenlik']
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div />
+        <button style={s.btnPrimary} onClick={openAdd}>+ Yeni Bakım Planı</button>
+      </div>
+
+      {loading ? <Spinner /> : (
+        <div style={s.card}>
+          <table style={s.table}>
+            <thead>
+              <tr>
+                {['Başlık', 'Kategori', 'Planlanan Tarih', 'Durum', 'İşlemler'].map(h => <th key={h} style={s.th}>{h}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {list.map(item => (
+                <tr key={item.id} style={s.tr}>
+                  <td style={s.td}><div style={{ fontWeight: 600, color: 'var(--t1)' }}>{item.title}</div><div style={{ fontSize: 12, color: 'var(--t5)' }}>{item.description}</div></td>
+                  <td style={s.td}><span style={s.badge}>{item.category}</span></td>
+                  <td style={s.td}>{new Date(item.scheduled_date).toLocaleDateString('tr-TR')}</td>
+                  <td style={s.td}><StatusPill status={item.status} map={statusMap} /></td>
+                  <td style={s.td}>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {item.status === 'bekliyor' && <button style={s.btnPrimary} onClick={() => updateStatus(item.id, 'tamamlandi')}>✓ Tamamla</button>}
+                      <button style={s.btnSecondary} onClick={() => openEdit(item)}>Düzenle</button>
+                      <button style={s.btnDanger} onClick={() => del(item.id)}>Sil</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {!list.length && <tr><td colSpan={5} style={{ ...s.td, textAlign: 'center', color: 'var(--t5)' }}>Kayıt yok</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {showModal && (
+        <Modal title={editItem ? 'Bakım Planını Düzenle' : 'Yeni Bakım Planı'} onClose={() => setShowModal(false)}>
+          <FormField label="Başlık"><input style={s.input} value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></FormField>
+          <FormField label="Kategori">
+            <select style={s.input} value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+              {categories.map(c => <option key={c}>{c}</option>)}
+            </select>
+          </FormField>
+          <FormField label="Planlanan Tarih"><input style={s.input} type="date" value={form.scheduled_date} onChange={e => setForm({ ...form, scheduled_date: e.target.value })} /></FormField>
+          <FormField label="Açıklama"><textarea style={{ ...s.input, height: 80, resize: 'vertical' }} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></FormField>
+          <FormField label="Notlar"><input style={s.input} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} /></FormField>
+          <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+            <button style={s.btnPrimary} onClick={save}>Kaydet</button>
+            <button style={s.btnSecondary} onClick={() => setShowModal(false)}>İptal</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  )
+}
+
+// ─── BELGELER ────────────────────────────────────────────────────────────────
+function BelgelerContent({ buildingId, isAdmin }) {
+  const [list, setList] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+  const [form, setForm] = useState({ title: '', description: '', category: 'diger', is_public: true })
+  const [file, setFile] = useState(null)
+  const [uploading, setUploading] = useState(false)
+
+  const load = () => {
+    setLoading(true)
+    client.get(`/api/documents?building_id=${buildingId}`)
+      .then(r => setList(r.data)).catch(() => {}).finally(() => setLoading(false))
+  }
+  useEffect(load, [])
+
+  const handleFile = e => {
+    const f = e.target.files[0]
+    if (!f) return
+    const reader = new FileReader()
+    reader.onload = ev => setFile({ name: f.name, type: f.type, size: f.size, data: ev.target.result.split(',')[1] })
+    reader.readAsDataURL(f)
+  }
+
+  const upload = async () => {
+    if (!form.title || !file) return
+    setUploading(true)
+    try {
+      await client.post('/api/documents', { building_id: buildingId, ...form, file_name: file.name, file_data: file.data, file_type: file.type, file_size: file.size })
+      setShowModal(false); setFile(null); setForm({ title: '', description: '', category: 'diger', is_public: true }); load()
+    } catch {} finally { setUploading(false) }
+  }
+
+  const download = async doc => {
+    try {
+      const { data } = await client.get(`/api/documents/${doc.id}/download`)
+      const link = document.createElement('a')
+      link.href = `data:${data.file_type};base64,${data.file_data}`
+      link.download = data.file_name
+      link.click()
+    } catch {}
+  }
+
+  const del = async id => { if (confirm('Silinsin mi?')) { await client.delete(`/api/documents/${id}`); load() } }
+
+  const cats = ['yonetim-plani', 'karar', 'tutanak', 'sigorta', 'diger']
+  const catLabel = { 'yonetim-plani': 'Yönetim Planı', karar: 'Karar', tutanak: 'Tutanak', sigorta: 'Sigorta', diger: 'Diğer' }
+
+  return (
+    <div>
+      {isAdmin && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+          <button style={s.btnPrimary} onClick={() => setShowModal(true)}>+ Belge Yükle</button>
+        </div>
+      )}
+      {loading ? <Spinner /> : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+          {list.map(doc => (
+            <div key={doc.id} style={{ ...s.card, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ fontSize: 32, textAlign: 'center' }}>📄</div>
+              <div style={{ fontWeight: 600, color: 'var(--t1)', textAlign: 'center' }}>{doc.title}</div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ ...s.badge, background: 'rgba(59,130,246,0.1)', color: '#60A5FA' }}>{catLabel[doc.category] || doc.category}</span>
+                {!doc.is_public && <span style={{ ...s.badge, background: 'rgba(245,158,11,0.1)', color: '#F59E0B' }}>Gizli</span>}
+              </div>
+              {doc.description && <div style={{ fontSize: 13, color: 'var(--t4)', textAlign: 'center' }}>{doc.description}</div>}
+              <div style={{ fontSize: 12, color: 'var(--t5)', textAlign: 'center' }}>{new Date(doc.created_at).toLocaleDateString('tr-TR')}</div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button style={{ ...s.btnPrimary, flex: 1 }} onClick={() => download(doc)}>⬇ İndir</button>
+                {isAdmin && <button style={s.btnDanger} onClick={() => del(doc.id)}>Sil</button>}
+              </div>
+            </div>
+          ))}
+          {!list.length && <div style={{ color: 'var(--t5)', padding: 40 }}>Henüz belge yüklenmedi</div>}
+        </div>
+      )}
+
+      {showModal && (
+        <Modal title="Belge Yükle" onClose={() => setShowModal(false)}>
+          <FormField label="Başlık"><input style={s.input} value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></FormField>
+          <FormField label="Kategori">
+            <select style={s.input} value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+              {cats.map(c => <option key={c} value={c}>{catLabel[c]}</option>)}
+            </select>
+          </FormField>
+          <FormField label="Açıklama"><input style={s.input} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></FormField>
+          <FormField label="Dosya"><input type="file" style={s.input} onChange={handleFile} accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png" /></FormField>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, cursor: 'pointer' }}>
+            <input type="checkbox" checked={form.is_public} onChange={e => setForm({ ...form, is_public: e.target.checked })} />
+            <span style={{ color: 'var(--t3)', fontSize: 14 }}>Sakinlere görünür</span>
+          </label>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button style={s.btnPrimary} onClick={upload} disabled={uploading}>{uploading ? 'Yükleniyor...' : 'Yükle'}</button>
+            <button style={s.btnSecondary} onClick={() => setShowModal(false)}>İptal</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  )
+}
+
+// ─── ANKET ───────────────────────────────────────────────────────────────────
+function AnketContent({ buildingId, user, isAdmin }) {
+  const [list, setList] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [detail, setDetail] = useState(null)
+  const [showCreate, setShowCreate] = useState(false)
+  const [form, setForm] = useState({ title: '', description: '', options: ['', ''], ends_at: '' })
+
+  const load = () => {
+    setLoading(true)
+    client.get(`/api/surveys?building_id=${buildingId}`)
+      .then(r => setList(r.data)).catch(() => {}).finally(() => setLoading(false))
+  }
+  useEffect(load, [])
+
+  const openDetail = async survey => {
+    const { data } = await client.get(`/api/surveys/${survey.id}`)
+    setDetail(data)
+  }
+
+  const vote = async optionId => {
+    await client.post(`/api/surveys/${detail.id}/vote`, { option_id: optionId })
+    openDetail(detail)
+  }
+
+  const create = async () => {
+    const opts = form.options.filter(o => o.trim())
+    if (!form.title || opts.length < 2) return
+    await client.post('/api/surveys', { building_id: buildingId, ...form, options: opts })
+    setShowCreate(false); setForm({ title: '', description: '', options: ['', ''], ends_at: '' }); load()
+  }
+
+  const toggleStatus = async survey => {
+    await client.put(`/api/surveys/${survey.id}`, { status: survey.status === 'aktif' ? 'kapali' : 'aktif' })
+    load()
+  }
+
+  const del = async id => { if (confirm('Silinsin mi?')) { await client.delete(`/api/surveys/${id}`); load() } }
+
+  return (
+    <div>
+      {isAdmin && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+          <button style={s.btnPrimary} onClick={() => setShowCreate(true)}>+ Yeni Anket</button>
+        </div>
+      )}
+      {loading ? <Spinner /> : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {list.map(survey => (
+            <div key={survey.id} style={s.card}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <div style={{ fontWeight: 600, color: 'var(--t1)', fontSize: 15 }}>{survey.title}</div>
+                  {survey.description && <div style={{ color: 'var(--t4)', fontSize: 13, marginTop: 4 }}>{survey.description}</div>}
+                  <div style={{ marginTop: 8, display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <span style={{ ...s.badge, background: survey.status === 'aktif' ? 'rgba(16,185,129,0.12)' : 'rgba(100,116,139,0.12)', color: survey.status === 'aktif' ? '#10B981' : '#64748B' }}>{survey.status === 'aktif' ? 'Aktif' : 'Kapalı'}</span>
+                    <span style={{ fontSize: 12, color: 'var(--t5)' }}>{survey.total_votes} oy · {survey.options_count} seçenek</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button style={s.btnSecondary} onClick={() => openDetail(survey)}>Sonuçlar</button>
+                  {isAdmin && <>
+                    <button style={s.btnSecondary} onClick={() => toggleStatus(survey)}>{survey.status === 'aktif' ? 'Kapat' : 'Aç'}</button>
+                    <button style={s.btnDanger} onClick={() => del(survey.id)}>Sil</button>
+                  </>}
+                </div>
+              </div>
+            </div>
+          ))}
+          {!list.length && <div style={{ color: 'var(--t5)', padding: 40, textAlign: 'center' }}>Henüz anket oluşturulmadı</div>}
+        </div>
+      )}
+
+      {detail && (
+        <Modal title={detail.title} onClose={() => setDetail(null)}>
+          {detail.description && <p style={{ color: 'var(--t4)', marginBottom: 16 }}>{detail.description}</p>}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+            {detail.options?.map(opt => {
+              const total = detail.options.reduce((s, o) => s + parseInt(o.vote_count), 0)
+              const pct = total ? Math.round(parseInt(opt.vote_count) / total * 100) : 0
+              const isMyVote = detail.my_vote === opt.id
+              return (
+                <div key={opt.id} style={{ border: `1px solid ${isMyVote ? '#3B82F6' : 'var(--border)'}`, borderRadius: 10, padding: '12px 16px', background: isMyVote ? 'rgba(59,130,246,0.08)' : 'var(--bg-hover)', cursor: detail.my_vote || detail.status !== 'aktif' ? 'default' : 'pointer' }}
+                  onClick={() => !detail.my_vote && detail.status === 'aktif' && vote(opt.id)}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <span style={{ color: 'var(--t1)', fontWeight: isMyVote ? 600 : 400 }}>{opt.option_text} {isMyVote && '✓'}</span>
+                    <span style={{ color: 'var(--t4)', fontSize: 13 }}>{opt.vote_count} oy ({pct}%)</span>
+                  </div>
+                  <div style={{ height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${pct}%`, background: isMyVote ? '#3B82F6' : '#64748B', borderRadius: 3 }} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          {!detail.my_vote && detail.status === 'aktif' && <p style={{ color: 'var(--t5)', fontSize: 13, textAlign: 'center' }}>Bir seçeneğe tıklayarak oy kullanın</p>}
+        </Modal>
+      )}
+
+      {showCreate && (
+        <Modal title="Yeni Anket Oluştur" onClose={() => setShowCreate(false)}>
+          <FormField label="Başlık"><input style={s.input} value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></FormField>
+          <FormField label="Açıklama"><input style={s.input} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></FormField>
+          <FormField label="Bitiş Tarihi (isteğe bağlı)"><input style={s.input} type="datetime-local" value={form.ends_at} onChange={e => setForm({ ...form, ends_at: e.target.value })} /></FormField>
+          <div style={{ marginBottom: 14 }}>
+            <label style={s.label}>Seçenekler</label>
+            {form.options.map((opt, i) => (
+              <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                <input style={{ ...s.input, flex: 1 }} placeholder={`Seçenek ${i + 1}`} value={opt} onChange={e => { const o = [...form.options]; o[i] = e.target.value; setForm({ ...form, options: o }) }} />
+                {form.options.length > 2 && <button style={s.btnDanger} onClick={() => setForm({ ...form, options: form.options.filter((_, j) => j !== i) })}>✕</button>}
+              </div>
+            ))}
+            <button style={s.btnSecondary} onClick={() => setForm({ ...form, options: [...form.options, ''] })}>+ Seçenek Ekle</button>
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button style={s.btnPrimary} onClick={create}>Oluştur</button>
+            <button style={s.btnSecondary} onClick={() => setShowCreate(false)}>İptal</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  )
+}
+
+// ─── REZERVASYON ─────────────────────────────────────────────────────────────
+function RezervasyonContent({ buildingId, user, isAdmin }) {
+  const [areas, setAreas] = useState([])
+  const [reservations, setReservations] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+  const [showAreaModal, setShowAreaModal] = useState(false)
+  const [form, setForm] = useState({ common_area_id: '', date: new Date().toISOString().split('T')[0], start_time: '', end_time: '', purpose: '' })
+  const [areaForm, setAreaForm] = useState({ name: '', description: '', capacity: '' })
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+
+  const load = () => {
+    setLoading(true)
+    Promise.all([
+      client.get(`/api/reservations/areas?building_id=${buildingId}`),
+      client.get(`/api/reservations?building_id=${buildingId}&date=${selectedDate}`)
+    ]).then(([a, r]) => { setAreas(a.data); setReservations(r.data) }).catch(() => {}).finally(() => setLoading(false))
+  }
+  useEffect(load, [selectedDate])
+
+  const createReservation = async () => {
+    if (!form.common_area_id || !form.date || !form.start_time || !form.end_time) return
+    try {
+      await client.post('/api/reservations', { ...form, building_id: buildingId })
+      setShowModal(false); load()
+    } catch (e) { alert(e.response?.data?.error || 'Hata oluştu') }
+  }
+
+  const createArea = async () => {
+    if (!areaForm.name) return
+    await client.post('/api/reservations/areas', { ...areaForm, building_id: buildingId })
+    setShowAreaModal(false); setAreaForm({ name: '', description: '', capacity: '' }); load()
+  }
+
+  const cancelRes = async id => { await client.delete(`/api/reservations/${id}`); load() }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <span style={{ color: 'var(--t4)', fontSize: 14 }}>Tarih:</span>
+          <input style={{ ...s.input, width: 160 }} type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} />
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          {isAdmin && <button style={s.btnSecondary} onClick={() => setShowAreaModal(true)}>+ Ortak Alan Ekle</button>}
+          <button style={s.btnPrimary} onClick={() => setShowModal(true)}>+ Rezervasyon Yap</button>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16 }}>
+        <div style={s.card}>
+          <div style={s.cardTitle}>Ortak Alanlar</div>
+          {areas.map(a => (
+            <div key={a.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--border-soft)' }}>
+              <div style={{ fontWeight: 600, color: 'var(--t1)' }}>{a.name}</div>
+              {a.capacity && <div style={{ fontSize: 12, color: 'var(--t5)' }}>Kapasite: {a.capacity} kişi</div>}
+              {a.description && <div style={{ fontSize: 12, color: 'var(--t4)' }}>{a.description}</div>}
+            </div>
+          ))}
+          {!areas.length && <div style={{ color: 'var(--t5)', fontSize: 13 }}>Alan tanımlı değil</div>}
+        </div>
+        <div style={s.card}>
+          <div style={s.cardTitle}>Rezervasyonlar — {new Date(selectedDate).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}</div>
+          {loading ? <Spinner /> : reservations.map(r => (
+            <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border-soft)' }}>
+              <div>
+                <span style={{ fontWeight: 600, color: 'var(--t1)' }}>{r.area_name}</span>
+                <span style={{ color: 'var(--t4)', fontSize: 13, marginLeft: 8 }}>{r.start_time?.slice(0,5)}–{r.end_time?.slice(0,5)}</span>
+                <div style={{ fontSize: 12, color: 'var(--t5)' }}>{r.user_name} {r.unit_number && `· Daire ${r.unit_number}`} {r.purpose && `· ${r.purpose}`}</div>
+              </div>
+              {(isAdmin || r.user_id === user?.id) && <button style={s.btnDanger} onClick={() => cancelRes(r.id)}>İptal</button>}
+            </div>
+          ))}
+          {!loading && !reservations.length && <div style={{ color: 'var(--t5)', fontSize: 13, textAlign: 'center', padding: 20 }}>Bu tarihte rezervasyon yok</div>}
+        </div>
+      </div>
+
+      {showModal && (
+        <Modal title="Rezervasyon Yap" onClose={() => setShowModal(false)}>
+          <FormField label="Ortak Alan">
+            <select style={s.input} value={form.common_area_id} onChange={e => setForm({ ...form, common_area_id: e.target.value })}>
+              <option value="">Seçin</option>
+              {areas.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+            </select>
+          </FormField>
+          <FormField label="Tarih"><input style={s.input} type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /></FormField>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <FormField label="Başlangıç"><input style={s.input} type="time" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} /></FormField>
+            <FormField label="Bitiş"><input style={s.input} type="time" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} /></FormField>
+          </div>
+          <FormField label="Amaç"><input style={s.input} value={form.purpose} onChange={e => setForm({ ...form, purpose: e.target.value })} /></FormField>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button style={s.btnPrimary} onClick={createReservation}>Rezervasyon Yap</button>
+            <button style={s.btnSecondary} onClick={() => setShowModal(false)}>İptal</button>
+          </div>
+        </Modal>
+      )}
+
+      {showAreaModal && (
+        <Modal title="Ortak Alan Ekle" onClose={() => setShowAreaModal(false)}>
+          <FormField label="Alan Adı"><input style={s.input} value={areaForm.name} onChange={e => setAreaForm({ ...areaForm, name: e.target.value })} placeholder="Toplantı Salonu" /></FormField>
+          <FormField label="Kapasite"><input style={s.input} type="number" value={areaForm.capacity} onChange={e => setAreaForm({ ...areaForm, capacity: e.target.value })} /></FormField>
+          <FormField label="Açıklama"><input style={s.input} value={areaForm.description} onChange={e => setAreaForm({ ...areaForm, description: e.target.value })} /></FormField>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button style={s.btnPrimary} onClick={createArea}>Ekle</button>
+            <button style={s.btnSecondary} onClick={() => setShowAreaModal(false)}>İptal</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  )
+}
+
+// ─── ZİYARETÇİ ───────────────────────────────────────────────────────────────
+function ZiyaretciContent({ buildingId, user, isAdmin }) {
+  const [list, setList] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+  const [form, setForm] = useState({ visitor_name: '', visitor_phone: '', vehicle_plate: '', visit_date: new Date().toISOString().split('T')[0], expected_arrival: '', notes: '' })
+  const [dateFilter, setDateFilter] = useState(new Date().toISOString().split('T')[0])
+
+  const load = () => {
+    setLoading(true)
+    client.get(`/api/visitors?building_id=${buildingId}&date=${dateFilter}`)
+      .then(r => setList(r.data)).catch(() => {}).finally(() => setLoading(false))
+  }
+  useEffect(load, [dateFilter])
+
+  const save = async () => {
+    if (!form.visitor_name || !form.visit_date) return
+    await client.post('/api/visitors', { ...form, building_id: buildingId })
+    setShowModal(false); load()
+  }
+
+  const updateStatus = async (id, status) => {
+    await client.put(`/api/visitors/${id}`, { status })
+    load()
+  }
+
+  const statusMap = {
+    bekleniyor: { bg: 'rgba(245,158,11,0.12)', color: '#F59E0B', label: 'Bekleniyor' },
+    iceride:    { bg: 'rgba(59,130,246,0.12)',  color: '#60A5FA', label: 'İçeride' },
+    ayrildi:    { bg: 'rgba(16,185,129,0.12)',  color: '#10B981', label: 'Ayrıldı' },
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <span style={{ color: 'var(--t4)', fontSize: 14 }}>Tarih:</span>
+          <input style={{ ...s.input, width: 160 }} type="date" value={dateFilter} onChange={e => setDateFilter(e.target.value)} />
+        </div>
+        <button style={s.btnPrimary} onClick={() => setShowModal(true)}>+ Ziyaretçi Ekle</button>
+      </div>
+
+      {loading ? <Spinner /> : (
+        <div style={s.card}>
+          <table style={s.table}>
+            <thead><tr>{['Ziyaretçi', 'Daire', 'Araç Plakası', 'Beklenen Saat', 'Durum', 'İşlem'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
+            <tbody>
+              {list.map(v => (
+                <tr key={v.id} style={s.tr}>
+                  <td style={s.td}><div style={{ fontWeight: 600, color: 'var(--t1)' }}>{v.visitor_name}</div><div style={{ fontSize: 12, color: 'var(--t5)' }}>{v.visitor_phone}</div></td>
+                  <td style={s.td}>{v.unit_number || v.resident_name || '—'}</td>
+                  <td style={s.td}>{v.vehicle_plate || '—'}</td>
+                  <td style={s.td}>{v.expected_arrival?.slice(0,5) || '—'}</td>
+                  <td style={s.td}><StatusPill status={v.status} map={statusMap} /></td>
+                  <td style={s.td}>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {v.status === 'bekleniyor' && <button style={s.btnPrimary} onClick={() => updateStatus(v.id, 'iceride')}>Girdi</button>}
+                      {v.status === 'iceride' && <button style={s.btnSecondary} onClick={() => updateStatus(v.id, 'ayrildi')}>Çıktı</button>}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {!list.length && <tr><td colSpan={6} style={{ ...s.td, textAlign: 'center', color: 'var(--t5)' }}>Bu tarihte ziyaretçi kaydı yok</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {showModal && (
+        <Modal title="Ziyaretçi Ekle" onClose={() => setShowModal(false)}>
+          <FormField label="Ziyaretçi Adı"><input style={s.input} value={form.visitor_name} onChange={e => setForm({ ...form, visitor_name: e.target.value })} /></FormField>
+          <FormField label="Telefon"><input style={s.input} value={form.visitor_phone} onChange={e => setForm({ ...form, visitor_phone: e.target.value })} /></FormField>
+          <FormField label="Araç Plakası"><input style={s.input} value={form.vehicle_plate} onChange={e => setForm({ ...form, vehicle_plate: e.target.value })} placeholder="34 ABC 123" /></FormField>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <FormField label="Ziyaret Tarihi"><input style={s.input} type="date" value={form.visit_date} onChange={e => setForm({ ...form, visit_date: e.target.value })} /></FormField>
+            <FormField label="Beklenen Saat"><input style={s.input} type="time" value={form.expected_arrival} onChange={e => setForm({ ...form, expected_arrival: e.target.value })} /></FormField>
+          </div>
+          <FormField label="Notlar"><input style={s.input} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} /></FormField>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button style={s.btnPrimary} onClick={save}>Kaydet</button>
+            <button style={s.btnSecondary} onClick={() => setShowModal(false)}>İptal</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  )
+}
+
+// ─── PERSONEL ────────────────────────────────────────────────────────────────
+function PersonelContent({ buildingId }) {
+  const [list, setList] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+  const [editItem, setEditItem] = useState(null)
+  const [form, setForm] = useState({ name: '', role: 'kapıcı', phone: '', email: '', start_date: '', salary: '', notes: '' })
+
+  const load = () => {
+    setLoading(true)
+    client.get(`/api/staff?building_id=${buildingId}`)
+      .then(r => setList(r.data)).catch(() => {}).finally(() => setLoading(false))
+  }
+  useEffect(load, [])
+
+  const openAdd = () => { setForm({ name: '', role: 'kapıcı', phone: '', email: '', start_date: '', salary: '', notes: '' }); setEditItem(null); setShowModal(true) }
+  const openEdit = p => { setForm({ name: p.name, role: p.role, phone: p.phone || '', email: p.email || '', start_date: p.start_date?.split('T')[0] || '', salary: p.salary || '', notes: p.notes || '' }); setEditItem(p); setShowModal(true) }
+
+  const save = async () => {
+    if (!form.name || !form.role) return
+    if (editItem) await client.put(`/api/staff/${editItem.id}`, { ...form, building_id: buildingId })
+    else await client.post('/api/staff', { ...form, building_id: buildingId })
+    setShowModal(false); load()
+  }
+
+  const deactivate = async id => { if (confirm('Personeli pasif yap?')) { await client.delete(`/api/staff/${id}`); load() } }
+
+  const roles = ['kapıcı', 'güvenlik', 'temizlik', 'bahçıvan', 'teknisyen', 'yönetici', 'diğer']
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+        <button style={s.btnPrimary} onClick={openAdd}>+ Personel Ekle</button>
+      </div>
+      {loading ? <Spinner /> : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+          {list.map(p => (
+            <div key={p.id} style={s.card}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg,#3B82F6,#2563EB)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: '#fff', flexShrink: 0 }}>{p.name.charAt(0)}</div>
+                <div>
+                  <div style={{ fontWeight: 600, color: 'var(--t1)' }}>{p.name}</div>
+                  <span style={{ ...s.badge, background: 'rgba(59,130,246,0.1)', color: '#60A5FA', fontSize: 12 }}>{p.role}</span>
+                </div>
+              </div>
+              {p.phone && <div style={{ fontSize: 13, color: 'var(--t4)', marginBottom: 4 }}>📞 {p.phone}</div>}
+              {p.salary && <div style={{ fontSize: 13, color: 'var(--t4)', marginBottom: 4 }}>₺ {parseFloat(p.salary).toLocaleString('tr-TR')}/ay</div>}
+              {p.start_date && <div style={{ fontSize: 12, color: 'var(--t5)' }}>İşe başlama: {new Date(p.start_date).toLocaleDateString('tr-TR')}</div>}
+              <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+                <button style={{ ...s.btnSecondary, flex: 1 }} onClick={() => openEdit(p)}>Düzenle</button>
+                <button style={s.btnDanger} onClick={() => deactivate(p.id)}>Çıkar</button>
+              </div>
+            </div>
+          ))}
+          {!list.length && <div style={{ color: 'var(--t5)', padding: 40 }}>Personel kaydı yok</div>}
+        </div>
+      )}
+
+      {showModal && (
+        <Modal title={editItem ? 'Personeli Düzenle' : 'Personel Ekle'} onClose={() => setShowModal(false)}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <FormField label="Ad Soyad"><input style={s.input} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></FormField>
+            <FormField label="Görev">
+              <select style={s.input} value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}>
+                {roles.map(r => <option key={r}>{r}</option>)}
+              </select>
+            </FormField>
+            <FormField label="Telefon"><input style={s.input} value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} /></FormField>
+            <FormField label="E-posta"><input style={s.input} value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></FormField>
+            <FormField label="İşe Başlama"><input style={s.input} type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} /></FormField>
+            <FormField label="Maaş (₺)"><input style={s.input} type="number" value={form.salary} onChange={e => setForm({ ...form, salary: e.target.value })} /></FormField>
+          </div>
+          <FormField label="Notlar"><textarea style={{ ...s.input, height: 60, resize: 'vertical' }} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} /></FormField>
+          <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+            <button style={s.btnPrimary} onClick={save}>Kaydet</button>
+            <button style={s.btnSecondary} onClick={() => setShowModal(false)}>İptal</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  )
+}
+
+// ─── MESAJLAR ────────────────────────────────────────────────────────────────
+function MesajlarContent({ buildingId, user, isAdmin }) {
+  const [list, setList] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [selected, setSelected] = useState(null)
+  const [replies, setReplies] = useState([])
+  const [newMsg, setNewMsg] = useState({ subject: '', body: '' })
+  const [reply, setReply] = useState('')
+  const [showNew, setShowNew] = useState(false)
+
+  const load = () => {
+    setLoading(true)
+    client.get(`/api/messages?building_id=${buildingId}`)
+      .then(r => setList(r.data)).catch(() => {}).finally(() => setLoading(false))
+  }
+  useEffect(load, [])
+
+  const openThread = async msg => {
+    setSelected(msg)
+    if (!msg.is_read) { await client.put(`/api/messages/${msg.id}/read`, {}); load() }
+    const { data } = await client.get(`/api/messages/${msg.id}/replies`)
+    setReplies(data)
+  }
+
+  const sendReply = async () => {
+    if (!reply.trim()) return
+    await client.post('/api/messages', { building_id: buildingId, body: reply, parent_id: selected.id, recipient_id: isAdmin ? selected.sender_id : null })
+    setReply(''); openThread(selected)
+  }
+
+  const sendNew = async () => {
+    if (!newMsg.body.trim()) return
+    await client.post('/api/messages', { building_id: buildingId, ...newMsg })
+    setShowNew(false); setNewMsg({ subject: '', body: '' }); load()
+  }
+
+  const unread = list.filter(m => !m.is_read && m.sender_id !== user.id).length
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16, height: 'calc(100vh - 200px)' }}>
+      <div style={{ ...s.card, overflowY: 'auto', padding: 0 }}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontWeight: 600, color: 'var(--t1)' }}>Mesajlar {unread > 0 && <span style={{ ...s.badge, background: 'rgba(239,68,68,0.15)', color: '#EF4444', marginLeft: 6 }}>{unread}</span>}</span>
+          {!isAdmin && <button style={{ ...s.btnPrimary, fontSize: 12, padding: '6px 12px' }} onClick={() => setShowNew(true)}>+ Yeni</button>}
+        </div>
+        {loading ? <Spinner /> : list.map(msg => (
+          <div key={msg.id} onClick={() => openThread(msg)} style={{ padding: '14px 20px', borderBottom: '1px solid var(--border-soft)', cursor: 'pointer', background: selected?.id === msg.id ? 'var(--bg-hover)' : 'transparent', borderLeft: !msg.is_read && msg.sender_id !== user.id ? '3px solid #3B82F6' : '3px solid transparent' }}>
+            <div style={{ fontWeight: !msg.is_read && msg.sender_id !== user.id ? 700 : 500, color: 'var(--t1)', fontSize: 14 }}>{msg.subject || '(Başlıksız)'}</div>
+            <div style={{ fontSize: 12, color: 'var(--t5)', marginTop: 2 }}>{msg.sender_name} · {new Date(msg.created_at).toLocaleDateString('tr-TR')}</div>
+            <div style={{ fontSize: 12, color: 'var(--t4)', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{msg.body}</div>
+          </div>
+        ))}
+        {!loading && !list.length && <div style={{ padding: 40, color: 'var(--t5)', textAlign: 'center' }}>Mesaj yok</div>}
+      </div>
+
+      <div style={{ ...s.card, display: 'flex', flexDirection: 'column' }}>
+        {selected ? (
+          <>
+            <div style={{ fontWeight: 700, color: 'var(--t1)', fontSize: 16, marginBottom: 4 }}>{selected.subject || '(Başlıksız)'}</div>
+            <div style={{ fontSize: 12, color: 'var(--t5)', marginBottom: 16 }}>{selected.sender_name} · {new Date(selected.created_at).toLocaleDateString('tr-TR')}</div>
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: '12px 16px', alignSelf: 'flex-start', maxWidth: '80%' }}>
+                <div style={{ fontSize: 12, color: 'var(--t5)', marginBottom: 4 }}>{selected.sender_name}</div>
+                <div style={{ color: 'var(--t2)', fontSize: 14, lineHeight: 1.6 }}>{selected.body}</div>
+              </div>
+              {replies.map(r => (
+                <div key={r.id} style={{ background: r.sender_id === user.id ? 'rgba(59,130,246,0.1)' : 'var(--bg-hover)', borderRadius: 10, padding: '12px 16px', alignSelf: r.sender_id === user.id ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
+                  <div style={{ fontSize: 12, color: 'var(--t5)', marginBottom: 4 }}>{r.sender_name}</div>
+                  <div style={{ color: 'var(--t2)', fontSize: 14, lineHeight: 1.6 }}>{r.body}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+              <input style={{ ...s.input, flex: 1 }} placeholder="Yanıt yaz..." value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendReply()} />
+              <button style={s.btnPrimary} onClick={sendReply}>Gönder</button>
+            </div>
+          </>
+        ) : (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--t5)' }}>Bir mesaj seçin</div>
+        )}
+      </div>
+
+      {showNew && (
+        <Modal title="Yöneticiye Mesaj Gönder" onClose={() => setShowNew(false)}>
+          <FormField label="Konu"><input style={s.input} value={newMsg.subject} onChange={e => setNewMsg({ ...newMsg, subject: e.target.value })} /></FormField>
+          <FormField label="Mesaj"><textarea style={{ ...s.input, height: 100, resize: 'vertical' }} value={newMsg.body} onChange={e => setNewMsg({ ...newMsg, body: e.target.value })} /></FormField>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button style={s.btnPrimary} onClick={sendNew}>Gönder</button>
+            <button style={s.btnSecondary} onClick={() => setShowNew(false)}>İptal</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  )
+}
+
+// ─── RAPORLAR ────────────────────────────────────────────────────────────────
+function RaporlarContent({ buildingId }) {
+  const now = new Date()
+  const [period, setPeriod] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`)
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  const load = () => {
+    setLoading(true)
+    client.get(`/api/reports/monthly?building_id=${buildingId}&period=${period}`)
+      .then(r => setData(r.data)).catch(() => {}).finally(() => setLoading(false))
+  }
+  useEffect(load, [period])
+
+  const print = () => {
+    if (!data) return
+    const months = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+    const [y, m] = period.split('-')
+    const label = `${months[parseInt(m)]} ${y}`
+    const repairRows = Object.entries(data.repairs || {}).map(([status, count]) =>
+      `<tr><td>${status}</td><td style="text-align:right;font-weight:600">${count} adet</td></tr>`).join('')
+    const expenseRows = (data.expenses.by_category || []).map(c =>
+      `<tr><td>${c.category}</td><td style="text-align:right;font-weight:600">₺${parseFloat(c.total).toLocaleString('tr-TR')}</td></tr>`).join('')
+    const html = `<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><title>Aylık Rapor — ${label}</title><style>
+      *{margin:0;padding:0;box-sizing:border-box}
+      body{font-family:'DM Sans',Arial,sans-serif;color:#1E293B;padding:32px;background:#fff}
+      h1{font-size:22px;font-weight:800;margin-bottom:4px}
+      .sub{color:#64748B;font-size:14px;margin-bottom:28px}
+      .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+      .stat{border:1px solid #E2E8F0;border-radius:10px;padding:16px;text-align:center}
+      .stat-val{font-size:26px;font-weight:800}
+      .stat-lbl{font-size:12px;color:#64748B;margin-top:4px}
+      .green{color:#10B981}.red{color:#EF4444}
+      .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+      .box{border:1px solid #E2E8F0;border-radius:10px;padding:16px}
+      .box h3{font-size:14px;font-weight:700;margin-bottom:10px;color:#1E293B}
+      table{width:100%;border-collapse:collapse;font-size:13px}
+      td{padding:6px 0;border-bottom:1px solid #F1F5F9;color:#334155}
+      .ann{text-align:center;padding:28px}
+      .ann .big{font-size:36px;font-weight:800;color:#1E293B}
+      .ann .lbl{font-size:13px;color:#64748B;margin-top:4px}
+      @media print{body{padding:16px}}
+    </style></head><body>
+      <h1>Aylık Yönetim Raporu</h1>
+      <div class="sub">${label} · ${data.apartments.total} Daire</div>
+      <div class="stats">
+        <div class="stat"><div class="stat-val green">₺${(data.payments.total_income || 0).toLocaleString('tr-TR')}</div><div class="stat-lbl">Toplam Gelir</div></div>
+        <div class="stat"><div class="stat-val red">₺${(data.expenses.total || 0).toLocaleString('tr-TR')}</div><div class="stat-lbl">Toplam Gider</div></div>
+        <div class="stat"><div class="stat-val ${data.balance >= 0 ? 'green' : 'red'}">₺${(data.balance || 0).toLocaleString('tr-TR')}</div><div class="stat-lbl">Net Bakiye</div></div>
+      </div>
+      <div class="grid">
+        <div class="box"><h3>Aidat Durumu</h3><table>
+          <tr><td>Ödenen</td><td style="text-align:right;color:#10B981;font-weight:600">${data.payments.paid?.count || 0} adet · ₺${(data.payments.paid?.total || 0).toLocaleString('tr-TR')}</td></tr>
+          <tr><td>Bekleyen</td><td style="text-align:right;color:#F59E0B;font-weight:600">${data.payments.pending?.count || 0} adet · ₺${(data.payments.pending?.total || 0).toLocaleString('tr-TR')}</td></tr>
+          <tr><td>Geciken</td><td style="text-align:right;color:#EF4444;font-weight:600">${data.payments.overdue?.count || 0} adet · ₺${(data.payments.overdue?.total || 0).toLocaleString('tr-TR')}</td></tr>
+        </table></div>
+        <div class="box"><h3>Gider Kategorileri</h3><table>${expenseRows || '<tr><td colspan="2" style="color:#94A3B8;text-align:center;padding:12px">Gider yok</td></tr>'}</table></div>
+        <div class="box"><h3>Arıza Özeti</h3><table>${repairRows || '<tr><td colspan="2" style="color:#94A3B8;text-align:center;padding:12px">Arıza yok</td></tr>'}</table></div>
+        <div class="box ann"><div class="big">${data.announcements}</div><div class="lbl">Duyuru Gönderildi</div></div>
+      </div>
+      <script>window.onload=()=>{window.print();setTimeout(()=>window.close(),1000)}<\/script>
+    </body></html>`
+    const w = window.open('', '_blank', 'width=900,height=700')
+    if (w) { w.document.write(html); w.document.close() }
+  }
+
+  const months = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+  const [y, m] = period.split('-')
+  const periodLabel = `${months[parseInt(m)]} ${y}`
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <span style={{ color: 'var(--t4)' }}>Dönem:</span>
+          <input style={{ ...s.input, width: 160 }} type="month" value={period} onChange={e => setPeriod(e.target.value)} />
+        </div>
+        <button style={s.btnPrimary} onClick={print}>🖨️ Yazdır / PDF</button>
+      </div>
+
+      {loading ? <Spinner /> : data && (
+        <div id="report-area">
+          <div style={{ ...s.card, marginBottom: 16, textAlign: 'center' }}>
+            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--t1)', fontFamily: 'Syne, sans-serif' }}>Aylık Yönetim Raporu</div>
+            <div style={{ color: 'var(--t4)', marginTop: 4 }}>{periodLabel} · {data.apartments.total} Daire</div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 16 }}>
+            {[
+              { label: 'Toplam Gelir', value: `₺${(data.payments.total_income || 0).toLocaleString('tr-TR')}`, color: '#10B981' },
+              { label: 'Toplam Gider', value: `₺${(data.expenses.total || 0).toLocaleString('tr-TR')}`, color: '#EF4444' },
+              { label: 'Net Bakiye', value: `₺${(data.balance || 0).toLocaleString('tr-TR')}`, color: data.balance >= 0 ? '#10B981' : '#EF4444' },
+            ].map(stat => (
+              <div key={stat.label} style={{ ...s.card, textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 800, color: stat.color, fontFamily: 'Syne, sans-serif' }}>{stat.value}</div>
+                <div style={{ fontSize: 13, color: 'var(--t5)', marginTop: 6 }}>{stat.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div style={s.card}>
+              <div style={s.cardTitle}>Aidat Durumu</div>
+              {[
+                { label: 'Ödenen', val: data.payments.paid, color: '#10B981' },
+                { label: 'Bekleyen', val: data.payments.pending, color: '#F59E0B' },
+                { label: 'Geciken', val: data.payments.overdue, color: '#EF4444' },
+              ].map(row => (
+                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-soft)' }}>
+                  <span style={{ color: 'var(--t3)' }}>{row.label}</span>
+                  <span style={{ color: row.color, fontWeight: 600 }}>{row.val?.count || 0} adet · ₺{(row.val?.total || 0).toLocaleString('tr-TR')}</span>
+                </div>
+              ))}
+            </div>
+
+            <div style={s.card}>
+              <div style={s.cardTitle}>Gider Kategorileri</div>
+              {data.expenses.by_category?.map((cat, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-soft)' }}>
+                  <span style={{ color: 'var(--t3)' }}>{cat.category}</span>
+                  <span style={{ color: 'var(--t1)', fontWeight: 600 }}>₺{parseFloat(cat.total).toLocaleString('tr-TR')}</span>
+                </div>
+              ))}
+              {!data.expenses.by_category?.length && <div style={{ color: 'var(--t5)', textAlign: 'center', padding: 20 }}>Gider yok</div>}
+            </div>
+
+            <div style={s.card}>
+              <div style={s.cardTitle}>Arıza Özeti</div>
+              {Object.entries(data.repairs || {}).map(([status, count]) => (
+                <div key={status} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-soft)' }}>
+                  <span style={{ color: 'var(--t3)' }}>{status}</span>
+                  <span style={{ color: 'var(--t1)', fontWeight: 600 }}>{count} adet</span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ ...s.card, alignItems: 'center', justifyContent: 'center', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: 40 }}>📣</div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--t1)', fontFamily: 'Syne, sans-serif' }}>{data.announcements}</div>
+              <div style={{ color: 'var(--t5)', marginTop: 4 }}>Duyuru Gönderildi</div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
