@@ -1,4 +1,4 @@
-export default function Logo({ size = 'md', showSubtitle = false, light = false, tenantName = null }) {
+export default function Logo({ size = 'md', showSubtitle = false, light = false, tenantName = null, hideText = false }) {
   const cfg = {
     sm: { icon: 28, title: 16, sub: 9,  gap: 8,  stroke: 1.5 },
     md: { icon: 38, title: 22, sub: 11, gap: 10, stroke: 2   },
@@ -24,7 +24,7 @@ export default function Logo({ size = 'md', showSubtitle = false, light = false,
         <line x1="8" y1="14" x2="26" y2="14" stroke="#3B82F6" strokeWidth="1.2" strokeLinecap="round" opacity="0.5" />
         <text x="20" y="31" textAnchor="middle" fill="#60A5FA" fontSize="11.5" fontFamily="monospace" fontWeight="700">&lt;/&gt;</text>
       </svg>
-      <div style={{ minWidth: 0 }}>
+      {!hideText && <div style={{ minWidth: 0 }}>
         <div style={{
           fontFamily: 'Syne, sans-serif',
           fontSize: dynamicSize,
@@ -47,7 +47,7 @@ export default function Logo({ size = 'md', showSubtitle = false, light = false,
             Powerful Applications & Advanced Backend
           </div>
         ) : null}
-      </div>
+      </div>}
     </div>
   )
 }

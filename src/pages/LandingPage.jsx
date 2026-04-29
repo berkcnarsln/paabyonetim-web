@@ -45,9 +45,10 @@ const plans = [
     price: '₺25',
     period: '/ daire / ay',
     note: 'En fazla 20 daire',
+    tag: 'İlk 30 gün ücretsiz',
     desc: 'Küçük siteler için ideal başlangıç.',
     features: ['20 daireye kadar', 'Aidat takibi', 'Duyurular', 'Arıza bildirimleri', 'E-posta desteği'],
-    cta: 'Hemen Başla',
+    cta: 'Ücretsiz Başla',
     highlight: false,
   },
   {
@@ -111,7 +112,7 @@ export default function LandingPage() {
       {/* Navbar */}
       <nav className="lp-nav">
         <div className="lp-nav-brand">
-          <Logo size="md" />
+          <Logo size="md" hideText />
           <span className="lp-nav-brand-name">PAAB Yönetim</span>
         </div>
         <div className="lp-nav-right">
@@ -299,6 +300,7 @@ export default function LandingPage() {
             {plans.map(p => (
               <div key={p.name} className={`lp-plan${p.highlight ? ' highlight' : ''}`}>
                 {p.highlight && <div className="lp-plan-badge">Popüler</div>}
+                {p.tag && <div className="lp-plan-tag">{p.tag}</div>}
                 <h3 className="lp-plan-name">{p.name}</h3>
                 <p className="lp-plan-desc">{p.desc}</p>
                 <div className="lp-plan-price">

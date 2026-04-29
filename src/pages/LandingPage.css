@@ -94,6 +94,7 @@
 .lp-plan { background: var(--bg-page); border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px; position: relative; display: flex; flex-direction: column; gap: 20px; }
 .lp-plan.highlight { border-color: #3B82F6; box-shadow: 0 0 0 1px #3B82F6; }
 .lp-plan-badge { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff; font-size: 12px; font-weight: 700; padding: 4px 14px; border-radius: 20px; white-space: nowrap; }
+.lp-plan-tag { display: inline-block; background: rgba(16,185,129,0.12); color: #10B981; border: 1px solid rgba(16,185,129,0.25); border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; }
 .lp-plan-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--t1); }
 .lp-plan-desc { font-size: 14px; color: var(--t3); margin-top: -12px; }
 .lp-plan-price { display: flex; align-items: baseline; gap: 6px; }
