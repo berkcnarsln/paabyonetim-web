@@ -42,18 +42,20 @@ const testimonials = [
 const plans = [
   {
     name: 'Başlangıç',
-    price: 'Ücretsiz',
-    period: '30 gün deneme',
-    desc: 'Sistemi keşfetmek için ideal.',
-    features: ['50 daireye kadar', 'Aidat takibi', 'Duyurular', 'Arıza bildirimleri', 'E-posta desteği'],
-    cta: 'Ücretsiz Dene',
+    price: '₺25',
+    period: '/ daire / ay',
+    note: 'En fazla 20 daire',
+    desc: 'Küçük siteler için ideal başlangıç.',
+    features: ['20 daireye kadar', 'Aidat takibi', 'Duyurular', 'Arıza bildirimleri', 'E-posta desteği'],
+    cta: 'Hemen Başla',
     highlight: false,
   },
   {
     name: 'Pro',
-    price: '₺490',
-    period: '/ ay',
-    desc: 'Orta ve büyük siteler için.',
+    price: '₺25',
+    period: '/ daire / ay',
+    note: 'Sınırsız daire',
+    desc: 'Büyüdükçe birlikte büyüyoruz.',
     features: ['Sınırsız daire', 'Tüm Başlangıç özellikleri', 'Gider raporlama', 'Özel subdomain', 'Öncelikli destek'],
     cta: 'Demo Talep Et',
     highlight: true,
@@ -62,6 +64,7 @@ const plans = [
     name: 'Kurumsal',
     price: 'Özel',
     period: 'fiyatlandırma',
+    note: null,
     desc: 'Birden fazla site yönetenler için.',
     features: ['Çoklu site yönetimi', 'API entegrasyonu', 'Özel domain', 'SLA garantisi', 'Dedike destek hattı'],
     cta: 'Bize Ulaşın',
@@ -107,7 +110,10 @@ export default function LandingPage() {
     <div className="lp-page">
       {/* Navbar */}
       <nav className="lp-nav">
-        <Logo size="md" />
+        <div className="lp-nav-brand">
+          <Logo size="md" />
+          <span className="lp-nav-brand-name">PAAB Yönetim</span>
+        </div>
         <div className="lp-nav-right">
           <button onClick={toggleTheme} className="lp-theme-btn" title={theme === 'dark' ? 'Açık tema' : 'Koyu tema'}>
             {theme === 'dark' ? '☀️' : '🌙'}
@@ -120,7 +126,7 @@ export default function LandingPage() {
       <section className="lp-hero">
         <div className="lp-hero-badge">Apartman Yönetim Sistemi</div>
         <h1 className="lp-hero-title">
-          Sitenizi akıllıca<br />yönetin.
+          Apartmanınızı<br />güvenle yönetin.
         </h1>
         <p className="lp-hero-sub">
           Aidat takibi, arıza bildirimleri, duyurular ve gider yönetimi —<br />
@@ -285,6 +291,10 @@ export default function LandingPage() {
             <h2 className="lp-section-title">Şeffaf fiyatlandırma</h2>
             <p className="lp-section-sub">Gizli ücret yok. İstediğiniz zaman iptal.</p>
           </div>
+          <div className="lp-pricing-note">
+            Ödediğiniz kadar ödersiniz — daire sayınıza göre otomatik hesaplanır.
+            <span className="lp-pricing-example">Örn: 40 daire × ₺25 = <strong>₺1.000 / ay</strong></span>
+          </div>
           <div className="lp-pricing">
             {plans.map(p => (
               <div key={p.name} className={`lp-plan${p.highlight ? ' highlight' : ''}`}>
@@ -295,6 +305,7 @@ export default function LandingPage() {
                   <span className="lp-plan-amount">{p.price}</span>
                   <span className="lp-plan-period">{p.period}</span>
                 </div>
+                {p.note && <div className="lp-plan-note">{p.note}</div>}
                 <ul className="lp-plan-features">
                   {p.features.map(f => (
                     <li key={f} className="lp-plan-feature">
