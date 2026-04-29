@@ -11,8 +11,90 @@ const features = [
   { icon: '👥', title: 'Kullanıcı Paneli', desc: 'Her daire sakini kendi panelinden bilgilerine ulaşır.' },
 ]
 
+const stats = [
+  { value: '150+', label: 'Aktif Site' },
+  { value: '6.200+', label: 'Kayıtlı Sakin' },
+  { value: '₺3.8M+', label: 'Aidat Takibi' },
+  { value: '%97', label: 'Memnuniyet' },
+]
+
+const testimonials = [
+  {
+    quote: 'Aidat takibinde harcadığımız zamanı ciddi ölçüde azalttı. Sakinler ödeme durumlarını artık kendileri görüyor, bizi aramıyorlar.',
+    name: 'Ahmet Yılmaz',
+    role: 'Site Yöneticisi — Yeşiltepe Sitesi',
+    avatar: 'AY',
+  },
+  {
+    quote: 'Arıza bildirimlerini kağıttan dijitale taşıdık. Hiçbir talep kaybolmuyor, geçmişe her zaman bakabiliyoruz.',
+    name: 'Fatma Kaya',
+    role: 'Yönetim Kurulu Başkanı — Güneş Apartmanı',
+    avatar: 'FK',
+  },
+  {
+    quote: 'Kendi panelimden aidat ödemelerimi ve duyuruları takip etmek çok kolay. Site yöneticisini artık sadece önemli konular için arıyorum.',
+    name: 'Murat Demir',
+    role: 'Daire Sakini — Lale Konutları',
+    avatar: 'MD',
+  },
+]
+
+const plans = [
+  {
+    name: 'Başlangıç',
+    price: 'Ücretsiz',
+    period: '30 gün deneme',
+    desc: 'Sistemi keşfetmek için ideal.',
+    features: ['50 daireye kadar', 'Aidat takibi', 'Duyurular', 'Arıza bildirimleri', 'E-posta desteği'],
+    cta: 'Ücretsiz Dene',
+    highlight: false,
+  },
+  {
+    name: 'Pro',
+    price: '₺490',
+    period: '/ ay',
+    desc: 'Orta ve büyük siteler için.',
+    features: ['Sınırsız daire', 'Tüm Başlangıç özellikleri', 'Gider raporlama', 'Özel subdomain', 'Öncelikli destek'],
+    cta: 'Demo Talep Et',
+    highlight: true,
+  },
+  {
+    name: 'Kurumsal',
+    price: 'Özel',
+    period: 'fiyatlandırma',
+    desc: 'Birden fazla site yönetenler için.',
+    features: ['Çoklu site yönetimi', 'API entegrasyonu', 'Özel domain', 'SLA garantisi', 'Dedike destek hattı'],
+    cta: 'Bize Ulaşın',
+    highlight: false,
+  },
+]
+
+const faqs = [
+  {
+    q: 'Kurulum süreci nasıl işliyor?',
+    a: 'Demo talebinden sonra sitenize özel subdomain oluşturuyoruz. Daire bilgilerini sisteme giriyor, sakinlere hesap açıyoruz. Tüm süreç 1-2 iş günü içinde tamamlanıyor.',
+  },
+  {
+    q: 'Sakinler sistemi nasıl kullanacak?',
+    a: 'Her sakine e-posta ile giriş bilgileri iletilir. Kendi panelinden aidat durumunu, duyuruları ve arıza bildirimlerini takip edebilirler. Teknik bilgi gerekmez.',
+  },
+  {
+    q: 'Verilerimiz güvende mi?',
+    a: 'Tüm veriler TLS şifrelemesiyle iletilir ve düzenli olarak yedeklenir. Verileriniz hiçbir üçüncü tarafla paylaşılmaz.',
+  },
+  {
+    q: 'Mevcut daire listesini içe aktarabilir miyiz?',
+    a: 'Evet. Excel veya CSV formatındaki daire ve sakin bilgilerinizi aktarabiliyoruz. Geçmiş aidat kayıtları için de import desteği sunuyoruz.',
+  },
+  {
+    q: 'Aboneliği istediğimde iptal edebilir miyim?',
+    a: 'Evet, herhangi bir uzun vadeli taahhüt bulunmuyor. İstediğiniz zaman iptal edebilir, verilerinizin kopyasını talep edebilirsiniz.',
+  },
+]
+
 export default function LandingPage() {
   const [theme, setTheme] = useState(() => localStorage.getItem('paab_theme') || 'dark')
+  const [faqOpen, setFaqOpen] = useState(null)
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark'
@@ -52,6 +134,88 @@ export default function LandingPage() {
         <div className="lp-blob2" />
       </section>
 
+      {/* Stats */}
+      <div className="lp-stats">
+        {stats.map(s => (
+          <div key={s.label} className="lp-stat">
+            <span className="lp-stat-value">{s.value}</span>
+            <span className="lp-stat-label">{s.label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Dashboard Preview */}
+      <section className="lp-preview-section">
+        <div className="lp-section-header">
+          <h2 className="lp-section-title">Yönetim bir ekrana sığdı</h2>
+          <p className="lp-section-sub">Temiz ve sezgisel arayüz — öğrenmesi dakikalar alır.</p>
+        </div>
+        <div className="lp-browser">
+          <div className="lp-browser-bar">
+            <span className="lp-browser-dot" style={{ background: '#FF5F57' }} />
+            <span className="lp-browser-dot" style={{ background: '#FEBC2E' }} />
+            <span className="lp-browser-dot" style={{ background: '#28C840' }} />
+            <span className="lp-browser-url">app.paabyonetim.com/dashboard</span>
+          </div>
+          <div className="lp-mock-layout">
+            <aside className="lp-mock-sidebar">
+              <div className="lp-mock-logo" />
+              <nav className="lp-mock-nav">
+                {['Dashboard', 'Aidatlar', 'Duyurular', 'Arıza', 'Giderler', 'Daireler'].map((item, i) => (
+                  <div key={item} className={`lp-mock-nav-item${i === 0 ? ' active' : ''}`}>{item}</div>
+                ))}
+              </nav>
+            </aside>
+            <main className="lp-mock-main">
+              <div className="lp-mock-topbar">
+                <div className="lp-mock-title-block">
+                  <div className="lp-mock-title-text" />
+                  <div className="lp-mock-sub-text" />
+                </div>
+                <div className="lp-mock-btn-placeholder" />
+              </div>
+              <div className="lp-mock-cards">
+                <div className="lp-mock-stat-card">
+                  <div className="lp-mock-stat-icon blue" />
+                  <div className="lp-mock-stat-body">
+                    <div className="lp-mock-stat-num">48</div>
+                    <div className="lp-mock-stat-lbl">Toplam Daire</div>
+                  </div>
+                </div>
+                <div className="lp-mock-stat-card">
+                  <div className="lp-mock-stat-icon green" />
+                  <div className="lp-mock-stat-body">
+                    <div className="lp-mock-stat-num">39</div>
+                    <div className="lp-mock-stat-lbl">Ödeme Yapıldı</div>
+                  </div>
+                </div>
+                <div className="lp-mock-stat-card">
+                  <div className="lp-mock-stat-icon orange" />
+                  <div className="lp-mock-stat-body">
+                    <div className="lp-mock-stat-num">9</div>
+                    <div className="lp-mock-stat-lbl">Bekleyen Aidat</div>
+                  </div>
+                </div>
+                <div className="lp-mock-stat-card">
+                  <div className="lp-mock-stat-icon red" />
+                  <div className="lp-mock-stat-body">
+                    <div className="lp-mock-stat-num">3</div>
+                    <div className="lp-mock-stat-lbl">Açık Arıza</div>
+                  </div>
+                </div>
+              </div>
+              <div className="lp-mock-table-section">
+                <div className="lp-mock-table-head" />
+                <div className="lp-mock-table-row" />
+                <div className="lp-mock-table-row alt" />
+                <div className="lp-mock-table-row" />
+                <div className="lp-mock-table-row alt" />
+              </div>
+            </main>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="lp-section">
         <div className="lp-section-header">
@@ -89,6 +253,80 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="lp-section">
+        <div className="lp-section-header">
+          <h2 className="lp-section-title">Kullanıcılarımız ne diyor?</h2>
+          <p className="lp-section-sub">Gerçek site yöneticileri ve sakinlerden.</p>
+        </div>
+        <div className="lp-testimonials">
+          {testimonials.map(t => (
+            <div key={t.name} className="lp-testimonial">
+              <p className="lp-testimonial-quote">"{t.quote}"</p>
+              <div className="lp-testimonial-author">
+                <div className="lp-testimonial-avatar">{t.avatar}</div>
+                <div>
+                  <div className="lp-testimonial-name">{t.name}</div>
+                  <div className="lp-testimonial-role">{t.role}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section className="lp-section-alt">
+        <div className="lp-section-inner">
+          <div className="lp-section-header">
+            <h2 className="lp-section-title">Şeffaf fiyatlandırma</h2>
+            <p className="lp-section-sub">Gizli ücret yok. İstediğiniz zaman iptal.</p>
+          </div>
+          <div className="lp-pricing">
+            {plans.map(p => (
+              <div key={p.name} className={`lp-plan${p.highlight ? ' highlight' : ''}`}>
+                {p.highlight && <div className="lp-plan-badge">Popüler</div>}
+                <h3 className="lp-plan-name">{p.name}</h3>
+                <p className="lp-plan-desc">{p.desc}</p>
+                <div className="lp-plan-price">
+                  <span className="lp-plan-amount">{p.price}</span>
+                  <span className="lp-plan-period">{p.period}</span>
+                </div>
+                <ul className="lp-plan-features">
+                  {p.features.map(f => (
+                    <li key={f} className="lp-plan-feature">
+                      <span className="lp-plan-check">✓</span> {f}
+                    </li>
+                  ))}
+                </ul>
+                <a href="mailto:info@paabyonetim.com" className={p.highlight ? 'lp-btn-primary' : 'lp-btn-secondary'}>
+                  {p.cta}
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="lp-section">
+        <div className="lp-section-header">
+          <h2 className="lp-section-title">Sık sorulan sorular</h2>
+          <p className="lp-section-sub">Aklınızdaki soruların cevabı burada.</p>
+        </div>
+        <div className="lp-faq">
+          {faqs.map((item, i) => (
+            <div key={i} className={`lp-faq-item${faqOpen === i ? ' open' : ''}`}>
+              <button className="lp-faq-q" onClick={() => setFaqOpen(faqOpen === i ? null : i)}>
+                {item.q}
+                <span className="lp-faq-icon">{faqOpen === i ? '−' : '+'}</span>
+              </button>
+              {faqOpen === i && <p className="lp-faq-a">{item.a}</p>}
+            </div>
+          ))}
         </div>
       </section>
 
