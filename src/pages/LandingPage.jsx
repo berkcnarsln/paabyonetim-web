@@ -37,6 +37,30 @@ const testimonials = [
     role: 'Daire Sakini — Lale Konutları',
     avatar: 'MD',
   },
+  {
+    quote: 'Duyuru göndermek artık saniyeler alıyor. Eskiden kapı kapı dolaşırdık, şimdi tek tıkla tüm sakinlere ulaşıyoruz.',
+    name: 'Elif Şahin',
+    role: 'Site Yöneticisi — Akasya Residence',
+    avatar: 'EŞ',
+  },
+  {
+    quote: 'Gider raporları sayesinde yönetim kuruluna aylık özet sunmak çok kolaylaştı. Her kalem kayıt altında.',
+    name: 'Cengiz Öztürk',
+    role: 'Yönetim Kurulu Üyesi — Panorama Sitesi',
+    avatar: 'CÖ',
+  },
+  {
+    quote: 'Sakin olarak hangi aidatı ödediğimi, hangisinin eksik olduğunu anında görebiliyorum. Şeffaf ve güvenilir.',
+    name: 'Selin Arslan',
+    role: 'Daire Sakini — Çınar Apartmanı',
+    avatar: 'SA',
+  },
+  {
+    quote: 'Kurulum süreci gerçekten hızlıydı. İki günde sistemimiz hazırdı, sakinlerimiz hemen adapte oldu.',
+    name: 'Kemal Doğan',
+    role: 'Site Yöneticisi — Mavi Köşk Sitesi',
+    avatar: 'KD',
+  },
 ]
 
 const plans = [
@@ -302,7 +326,7 @@ export default function LandingPage() {
           <h2 className="lp-section-title">Kullanıcılarımız ne diyor?</h2>
           <p className="lp-section-sub">Gerçek site yöneticileri ve sakinlerden.</p>
         </div>
-        <div className="lp-testimonials">
+        <div className="lp-testimonials-track">
           {testimonials.map(t => (
             <div key={t.name} className="lp-testimonial">
               <p className="lp-testimonial-quote">"{t.quote}"</p>
