@@ -41,19 +41,32 @@ export default function Sidebar({ role, activePage, setActivePage, user, onLogou
   }
 
   const adminMenu = [
-    { id: 'dashboard', icon: '⊞', label: 'Dashboard' },
-    { id: 'aidatlar', icon: '₺', label: 'Aidatlar' },
-    { id: 'daireler', icon: '⬡', label: 'Daireler' },
-    { id: 'duyurular', icon: '📣', label: 'Duyurular' },
-    { id: 'arizalar', icon: '🔧', label: 'Arızalar' },
-    { id: 'giderler', icon: '📊', label: 'Giderler' },
+    { id: 'dashboard',    icon: '⊞',  label: 'Dashboard' },
+    { id: 'aidatlar',     icon: '₺',  label: 'Aidatlar' },
+    { id: 'daireler',     icon: '⬡',  label: 'Daireler' },
+    { id: 'duyurular',    icon: '📣', label: 'Duyurular' },
+    { id: 'arizalar',     icon: '🔧', label: 'Arızalar' },
+    { id: 'giderler',     icon: '📊', label: 'Giderler' },
     { id: 'kullanicilar', icon: '👥', label: 'Kullanıcılar' },
+    { id: 'bakim',        icon: '🗓️', label: 'Bakım Takvimi' },
+    { id: 'belgeler',     icon: '📁', label: 'Belgeler' },
+    { id: 'anket',        icon: '📋', label: 'Anketler' },
+    { id: 'rezervasyon',  icon: '🏛️', label: 'Rezervasyon' },
+    { id: 'ziyaretci',    icon: '🚪', label: 'Ziyaretçiler' },
+    { id: 'personel',     icon: '👷', label: 'Personel' },
+    { id: 'mesajlar',     icon: '💬', label: 'Mesajlar' },
+    { id: 'raporlar',     icon: '📈', label: 'Raporlar' },
   ]
   const residentMenu = [
-    { id: 'dashboard', icon: '⊞', label: 'Genel Bakış' },
-    { id: 'aidatlar', icon: '₺', label: 'Aidatlarım' },
-    { id: 'duyurular', icon: '📣', label: 'Duyurular' },
-    { id: 'arizalar', icon: '🔧', label: 'Arıza Bildir' },
+    { id: 'dashboard',   icon: '⊞',  label: 'Genel Bakış' },
+    { id: 'aidatlar',    icon: '₺',  label: 'Aidatlarım' },
+    { id: 'duyurular',   icon: '📣', label: 'Duyurular' },
+    { id: 'arizalar',    icon: '🔧', label: 'Arıza Bildir' },
+    { id: 'anket',       icon: '📋', label: 'Anketler' },
+    { id: 'rezervasyon', icon: '🏛️', label: 'Rezervasyon' },
+    { id: 'ziyaretci',   icon: '🚪', label: 'Ziyaretçilerim' },
+    { id: 'belgeler',    icon: '📁', label: 'Belgeler' },
+    { id: 'mesajlar',    icon: '💬', label: 'Mesajlar' },
   ]
   const menu = role === 'admin' ? adminMenu : residentMenu
 
@@ -167,10 +180,10 @@ export default function Sidebar({ role, activePage, setActivePage, user, onLogou
 
 const s = {
   sidebar: {
-    width: '240px', minHeight: '100vh', background: '#0D1424',
+    width: '240px', height: '100vh', background: '#0D1424',
     borderRight: '1px solid rgba(255,255,255,0.06)',
     display: 'flex', flexDirection: 'column', padding: '24px 0',
-    flexShrink: 0,
+    flexShrink: 0, overflowY: 'auto',
   },
   logo: {
     display: 'flex', alignItems: 'center', gap: '10px',

@@ -317,7 +317,7 @@ function ArizalarContent({ user }) {
           )}
         </div>
         <button style={{ ...s.btnPrimary, marginTop: '12px' }} onClick={bildir} disabled={saving}>
-          {saving ? 'Gönderiliyor...' : '🔧 Arıza Bildir'}
+          {saving ? 'Gönderiliyor...' : photo ? '🔧 Arıza Bildir (fotoğraflı)' : '🔧 Arıza Bildir'}
         </button>
       </div>
       <div style={s.card}>
