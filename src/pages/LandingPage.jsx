@@ -141,16 +141,14 @@ export default function LandingPage() {
           <Logo size="md" hideText />
           <span className="lp-nav-brand-name">PAAB Yönetim</span>
         </div>
-        <div className="lp-nav-links">
-          <a href="#ozellikler" className="lp-nav-link">Özellikler</a>
-          <a href="#fiyatlar" className="lp-nav-link">Fiyatlar</a>
-          <a href="#sss" className="lp-nav-link">SSS</a>
-        </div>
         <div className="lp-nav-right">
+          <a href="#ozellikler" className="lp-nav-link lp-nav-section">Özellikler</a>
+          <a href="#fiyatlar" className="lp-nav-link lp-nav-section">Fiyatlar</a>
+          <a href="#sss" className="lp-nav-link lp-nav-section">SSS</a>
+          <a href="mailto:info@paabyonetim.com" className="lp-nav-link">İletişim</a>
           <button onClick={toggleTheme} className="lp-theme-btn" title={theme === 'dark' ? 'Açık tema' : 'Koyu tema'}>
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-          <a href="mailto:info@paabyonetim.com" className="lp-nav-link">İletişim</a>
         </div>
       </nav>
 
