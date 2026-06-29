@@ -4,7 +4,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import ResidentDashboard from './pages/ResidentDashboard'
 import LandingPage from './pages/LandingPage'
 import { getSubdomain } from './api/client'
-import { TenantProvider } from './api/tenant'
+import { TenantProvider, TenantGate } from './api/tenant'
 
 const INACTIVITY_MS = 5 * 60 * 1000 // 5 dakika
 
@@ -73,19 +73,16 @@ export default function App() {
 
   if (!ready) return null
   if (!isTenant) return <LandingPage />
-  if (!user) return (
-    <TenantProvider>
-      <Login onLogin={handleLogin} tenantName={tenantName} />
-    </TenantProvider>
-  )
-  if (user.role === 'admin') return (
-    <TenantProvider>
-      <AdminDashboard user={user} onLogout={handleLogout} tenantName={tenantName} />
-    </TenantProvider>
-  )
+
+  const inner = !user
+    ? <Login onLogin={handleLogin} tenantName={tenantName} />
+    : user.role === 'admin'
+      ? <AdminDashboard user={user} onLogout={handleLogout} tenantName={tenantName} />
+      : <ResidentDashboard user={user} onLogout={handleLogout} tenantName={tenantName} />
+
   return (
     <TenantProvider>
-      <ResidentDashboard user={user} onLogout={handleLogout} tenantName={tenantName} />
+      <TenantGate>{inner}</TenantGate>
     </TenantProvider>
   )
 }
