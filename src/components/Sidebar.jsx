@@ -1,8 +1,10 @@
 import Logo from './Logo'
 import { useState } from 'react'
 import client from '../api/client'
+import { useTenant } from '../api/tenant'
 
 export default function Sidebar({ role, activePage, setActivePage, user, onLogout, isMobile, isOpen, tenantName }) {
+  const { hasFeature } = useTenant()
   const [theme, setTheme] = useState(() => localStorage.getItem('paab_theme') || 'dark')
   const [showPwModal, setShowPwModal] = useState(false)
   const [pw, setPw] = useState({ current: '', next: '', confirm: '' })
@@ -48,13 +50,13 @@ export default function Sidebar({ role, activePage, setActivePage, user, onLogou
     { id: 'arizalar',     icon: '🔧', label: 'Arızalar' },
     { id: 'giderler',     icon: '📊', label: 'Giderler' },
     { id: 'kullanicilar', icon: '👥', label: 'Kullanıcılar' },
-    { id: 'bakim',        icon: '🗓️', label: 'Bakım Takvimi' },
-    { id: 'belgeler',     icon: '📁', label: 'Belgeler' },
-    { id: 'anket',        icon: '📋', label: 'Anketler' },
-    { id: 'rezervasyon',  icon: '🏛️', label: 'Rezervasyon' },
-    { id: 'ziyaretci',    icon: '🚪', label: 'Ziyaretçiler' },
-    { id: 'personel',     icon: '👷', label: 'Personel' },
-    { id: 'mesajlar',     icon: '💬', label: 'Mesajlar' },
+    { id: 'bakim',        icon: '🗓️', label: 'Bakım Takvimi', feature: 'maintenance' },
+    { id: 'belgeler',     icon: '📁', label: 'Belgeler',       feature: 'documents' },
+    { id: 'anket',        icon: '📋', label: 'Anketler',       feature: 'surveys' },
+    { id: 'rezervasyon',  icon: '🏛️', label: 'Rezervasyon',    feature: 'reservations' },
+    { id: 'ziyaretci',    icon: '🚪', label: 'Ziyaretçiler',   feature: 'visitors' },
+    { id: 'personel',     icon: '👷', label: 'Personel',       feature: 'staff' },
+    { id: 'mesajlar',     icon: '💬', label: 'Mesajlar',       feature: 'messaging' },
     { id: 'raporlar',     icon: '📈', label: 'Raporlar' },
   ]
   const residentMenu = [
@@ -62,13 +64,14 @@ export default function Sidebar({ role, activePage, setActivePage, user, onLogou
     { id: 'aidatlar',    icon: '₺',  label: 'Aidatlarım' },
     { id: 'duyurular',   icon: '📣', label: 'Duyurular' },
     { id: 'arizalar',    icon: '🔧', label: 'Arıza Bildir' },
-    { id: 'anket',       icon: '📋', label: 'Anketler' },
-    { id: 'rezervasyon', icon: '🏛️', label: 'Rezervasyon' },
-    { id: 'ziyaretci',   icon: '🚪', label: 'Ziyaretçilerim' },
-    { id: 'belgeler',    icon: '📁', label: 'Belgeler' },
-    { id: 'mesajlar',    icon: '💬', label: 'Mesajlar' },
+    { id: 'anket',       icon: '📋', label: 'Anketler',       feature: 'surveys' },
+    { id: 'rezervasyon', icon: '🏛️', label: 'Rezervasyon',    feature: 'reservations' },
+    { id: 'ziyaretci',   icon: '🚪', label: 'Ziyaretçilerim', feature: 'visitors' },
+    { id: 'belgeler',    icon: '📁', label: 'Belgeler',       feature: 'documents' },
+    { id: 'mesajlar',    icon: '💬', label: 'Mesajlar',       feature: 'messaging' },
   ]
-  const menu = role === 'admin' ? adminMenu : residentMenu
+  const baseMenu = role === 'admin' ? adminMenu : residentMenu
+  const menu = baseMenu.filter(item => !item.feature || hasFeature(item.feature))
 
   const mobileStyle = isMobile ? {
     position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 100,
