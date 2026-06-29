@@ -27,6 +27,37 @@
   --danger:  #EF4444;
   --font-heading: 'Syne', sans-serif;
   --font-body: 'DM Sans', sans-serif;
+
+  /* Status renkleri — Dark tema */
+  --st-odendi-bg:      rgba(16,185,129,0.12);
+  --st-odendi-text:    #6EE7B7;
+  --st-odendi-border:  rgba(16,185,129,0.3);
+  --st-odendi-dot:     #10B981;
+
+  --st-bekliyor-bg:     rgba(245,158,11,0.12);
+  --st-bekliyor-text:   #FCD34D;
+  --st-bekliyor-border: rgba(245,158,11,0.3);
+  --st-bekliyor-dot:    #F59E0B;
+
+  --st-gecikmis-bg:     rgba(239,68,68,0.12);
+  --st-gecikmis-text:   #FCA5A5;
+  --st-gecikmis-border: rgba(239,68,68,0.3);
+  --st-gecikmis-dot:    #EF4444;
+
+  --st-inceleniyor-bg:     rgba(59,130,246,0.12);
+  --st-inceleniyor-text:   #93C5FD;
+  --st-inceleniyor-border: rgba(59,130,246,0.3);
+  --st-inceleniyor-dot:    #3B82F6;
+
+  --st-tamamlandi-bg:     rgba(16,185,129,0.12);
+  --st-tamamlandi-text:   #6EE7B7;
+  --st-tamamlandi-border: rgba(16,185,129,0.3);
+  --st-tamamlandi-dot:    #10B981;
+
+  --st-default-bg:     rgba(100,116,139,0.15);
+  --st-default-text:   #94A3B8;
+  --st-default-border: rgba(100,116,139,0.3);
+  --st-default-dot:    #64748B;
 }
 
 [data-theme="light"] {
@@ -42,6 +73,37 @@
   --t3:  #475569;
   --t4:  #64748B;
   --t5:  #94A3B8;
+
+  /* Status renkleri — Light tema (pastel arka plan + koyu yazı) */
+  --st-odendi-bg:      #D1FAE5;
+  --st-odendi-text:    #065F46;
+  --st-odendi-border:  #6EE7B7;
+  --st-odendi-dot:     #059669;
+
+  --st-bekliyor-bg:     #FEF3C7;
+  --st-bekliyor-text:   #92400E;
+  --st-bekliyor-border: #FCD34D;
+  --st-bekliyor-dot:    #D97706;
+
+  --st-gecikmis-bg:     #FEE2E2;
+  --st-gecikmis-text:   #991B1B;
+  --st-gecikmis-border: #FCA5A5;
+  --st-gecikmis-dot:    #DC2626;
+
+  --st-inceleniyor-bg:     #DBEAFE;
+  --st-inceleniyor-text:   #1E40AF;
+  --st-inceleniyor-border: #93C5FD;
+  --st-inceleniyor-dot:    #2563EB;
+
+  --st-tamamlandi-bg:     #D1FAE5;
+  --st-tamamlandi-text:   #065F46;
+  --st-tamamlandi-border: #6EE7B7;
+  --st-tamamlandi-dot:    #059669;
+
+  --st-default-bg:     #F1F5F9;
+  --st-default-text:   #475569;
+  --st-default-border: #CBD5E1;
+  --st-default-dot:    #94A3B8;
 }
 
 html, body, #root {
@@ -77,6 +139,100 @@ body {
 
 .animate-fadeUp { animation: fadeUp 0.5s ease forwards; }
 .animate-fadeIn { animation: fadeIn 0.4s ease forwards; }
+
+/* Status pill — tema duyarlı, modern */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid;
+  white-space: nowrap;
+  letter-spacing: 0.1px;
+  background: var(--st-default-bg);
+  color: var(--st-default-text);
+  border-color: var(--st-default-border);
+  text-transform: lowercase;
+}
+.status-pill::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--st-default-dot);
+}
+.status-pill[data-status="ödendi"],
+.status-pill[data-status="onaylandı"] {
+  background: var(--st-odendi-bg);
+  color: var(--st-odendi-text);
+  border-color: var(--st-odendi-border);
+}
+.status-pill[data-status="ödendi"]::before,
+.status-pill[data-status="onaylandı"]::before { background: var(--st-odendi-dot); }
+
+.status-pill[data-status="bekliyor"] {
+  background: var(--st-bekliyor-bg);
+  color: var(--st-bekliyor-text);
+  border-color: var(--st-bekliyor-border);
+}
+.status-pill[data-status="bekliyor"]::before { background: var(--st-bekliyor-dot); }
+
+.status-pill[data-status="gecikmiş"] {
+  background: var(--st-gecikmis-bg);
+  color: var(--st-gecikmis-text);
+  border-color: var(--st-gecikmis-border);
+}
+.status-pill[data-status="gecikmiş"]::before { background: var(--st-gecikmis-dot); }
+
+.status-pill[data-status="inceleniyor"] {
+  background: var(--st-inceleniyor-bg);
+  color: var(--st-inceleniyor-text);
+  border-color: var(--st-inceleniyor-border);
+}
+.status-pill[data-status="inceleniyor"]::before { background: var(--st-inceleniyor-dot); }
+
+.status-pill[data-status="tamamlandı"] {
+  background: var(--st-tamamlandi-bg);
+  color: var(--st-tamamlandi-text);
+  border-color: var(--st-tamamlandi-border);
+}
+.status-pill[data-status="tamamlandı"]::before { background: var(--st-tamamlandi-dot); }
+
+/* Status select — durum dropdown'u, status pill ile aynı renk paleti */
+.status-select {
+  border-radius: 999px;
+  padding: 5px 30px 5px 14px !important;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--st-default-border);
+  background-color: var(--st-default-bg);
+  color: var(--st-default-text);
+  cursor: pointer;
+  outline: none;
+  text-transform: lowercase;
+  font-family: var(--font-body);
+  transition: background 0.15s, border-color 0.15s;
+}
+.status-select[data-status="bekliyor"] {
+  background-color: var(--st-bekliyor-bg);
+  color: var(--st-bekliyor-text);
+  border-color: var(--st-bekliyor-border);
+}
+.status-select[data-status="inceleniyor"] {
+  background-color: var(--st-inceleniyor-bg);
+  color: var(--st-inceleniyor-text);
+  border-color: var(--st-inceleniyor-border);
+}
+.status-select[data-status="tamamlandı"] {
+  background-color: var(--st-tamamlandi-bg);
+  color: var(--st-tamamlandi-text);
+  border-color: var(--st-tamamlandi-border);
+}
+.status-select option { background-color: var(--bg-card); color: var(--t1); }
 
 /* Select dropdown */
 select {

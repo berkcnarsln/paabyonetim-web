@@ -520,15 +520,12 @@ function ArizalarContent({ buildingId }) {
               <td style={s.td}>{new Date(a.created_at).toLocaleDateString('tr-TR')}</td>
               <td style={s.td}>
                 <select
+                  className="status-select"
+                  data-status={a.status}
                   value={a.status}
                   disabled={updating === a.id}
                   onChange={e => updateStatus(a.id, e.target.value)}
-                  style={{
-                    background: '#1E293B', border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '6px', padding: '5px 10px', color: '#F1F5F9',
-                    fontSize: '13px', cursor: 'pointer', outline: 'none',
-                    opacity: updating === a.id ? 0.5 : 1,
-                  }}
+                  style={{ opacity: updating === a.id ? 0.5 : 1 }}
                 >
                   {statusOptions.map(opt => (
                     <option key={opt} value={opt}>{opt}</option>
@@ -852,15 +849,7 @@ function KullanicilarContent({ buildingId }) {
 }
 
 function StatusBadge({ durum }) {
-  const map = {
-    'ödendi':     { bg: 'rgba(16,185,129,0.12)', color: '#10B981' },
-    'bekliyor':   { bg: 'rgba(245,158,11,0.12)', color: '#F59E0B' },
-    'gecikmiş':   { bg: 'rgba(239,68,68,0.12)',  color: '#EF4444' },
-    'tamamlandı': { bg: 'rgba(16,185,129,0.12)', color: '#10B981' },
-    'inceleniyor':{ bg: 'rgba(59,130,246,0.12)', color: '#60A5FA' },
-  }
-  const c = map[durum] || { bg: 'rgba(100,116,139,0.12)', color: '#94A3B8' }
-  return <span style={{ ...s.badge, background: c.bg, color: c.color }}>{durum}</span>
+  return <span className="status-pill" data-status={durum}>{durum}</span>
 }
 
 const s = {

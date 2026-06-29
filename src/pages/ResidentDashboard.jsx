@@ -357,15 +357,7 @@ function ArizalarContent({ user }) {
 }
 
 function StatusBadge({ durum }) {
-  const map = {
-    'ödendi':     { bg: 'rgba(16,185,129,0.12)', color: '#10B981' },
-    'bekliyor':   { bg: 'rgba(245,158,11,0.12)', color: '#F59E0B' },
-    'gecikmiş':   { bg: 'rgba(239,68,68,0.12)',  color: '#EF4444' },
-    'tamamlandı': { bg: 'rgba(16,185,129,0.12)', color: '#10B981' },
-    'inceleniyor':{ bg: 'rgba(59,130,246,0.12)', color: '#60A5FA' },
-  }
-  const c = map[durum] || { bg: 'rgba(100,116,139,0.12)', color: '#94A3B8' }
-  return <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '500', background: c.bg, color: c.color }}>{durum}</span>
+  return <span className="status-pill" data-status={durum}>{durum}</span>
 }
 
 function PriorityBadge({ priority }) {
