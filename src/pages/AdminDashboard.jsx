@@ -661,8 +661,32 @@ function KullanicilarContent({ buildingId }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [showForm, setShowForm] = useState(false)
+  const [resetResult, setResetResult] = useState(null)
+  const [resettingId, setResettingId] = useState(null)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => { if (data) setList(data) }, [data])
+
+  const sifreSifirla = async (u) => {
+    if (!confirm(`${u.name} adlı kullanıcının şifresi sıfırlanacak. Yeni şifre size gösterilecek, kullanıcıya iletmeniz gerekir. Devam edilsin mi?`)) return
+    setResettingId(u.id); setCopied(false)
+    try {
+      const { data: res } = await client.post(`/api/users/${u.id}/reset-password`)
+      setResetResult(res)
+    } catch (err) {
+      alert(err.response?.data?.error || 'Şifre sıfırlanamadı')
+    } finally {
+      setResettingId(null)
+    }
+  }
+
+  const kopyala = async () => {
+    try {
+      await navigator.clipboard.writeText(resetResult.new_password)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {}
+  }
 
   const kaydet = async () => {
     if (!form.name || !form.email || !form.password) { setError('İsim, e-posta ve şifre zorunlu'); return }
@@ -775,6 +799,13 @@ function KullanicilarContent({ buildingId }) {
                   <td style={s.td}><span style={{ ...s.badge, background: u.is_active ? 'rgba(16,185,129,0.12)' : 'rgba(100,116,139,0.12)', color: u.is_active ? '#10B981' : '#64748B' }}>{u.is_active ? 'Aktif' : 'Pasif'}</span></td>
                   <td style={s.td}>
                     <button onClick={() => { setEditUser({ ...u, password: '' }); setError(''); setShowForm(false) }} style={{ background: 'none', border: 'none', color: '#60A5FA', cursor: 'pointer', fontSize: '13px', marginRight: '10px' }}>Düzenle</button>
+                    <button
+                      onClick={() => sifreSifirla(u)}
+                      disabled={resettingId === u.id}
+                      style={{ background: 'none', border: 'none', color: '#F59E0B', cursor: 'pointer', fontSize: '13px', marginRight: '10px' }}
+                    >
+                      {resettingId === u.id ? 'Sıfırlanıyor...' : '🔑 Şifre Sıfırla'}
+                    </button>
                     <button onClick={() => sil(u.id)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: '13px' }}>Devre Dışı</button>
                   </td>
                 </tr>
@@ -784,6 +815,38 @@ function KullanicilarContent({ buildingId }) {
           </table>
         )}
       </div>
+
+      {resetResult && (
+        <Modal title="Şifre Sıfırlandı" onClose={() => setResetResult(null)}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 8, padding: 12, color: '#FCD34D', fontSize: 13 }}>
+              ⚠️ Bu şifre yalnızca bir kez gösterilir. Pencereyi kapattıktan sonra tekrar göremezsiniz.
+            </div>
+            <div>
+              <div style={{ ...s.label, marginBottom: 6 }}>Kullanıcı</div>
+              <div style={{ color: 'var(--t1)', fontSize: 14, fontWeight: 600 }}>{resetResult.user.name}</div>
+              <div style={{ color: 'var(--t5)', fontSize: 12 }}>{resetResult.user.email}</div>
+            </div>
+            <div>
+              <div style={{ ...s.label, marginBottom: 6 }}>Yeni Şifre</div>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: 'var(--bg-input)', border: '1px solid var(--border-strong)',
+                borderRadius: 8, padding: '12px 14px',
+              }}>
+                <code style={{ flex: 1, fontFamily: 'monospace', fontSize: 16, color: 'var(--t1)', letterSpacing: 1 }}>{resetResult.new_password}</code>
+                <button onClick={kopyala} style={{ ...s.btnPrimary, padding: '6px 12px', background: copied ? '#10B981' : undefined }}>
+                  {copied ? '✓ Kopyalandı' : 'Kopyala'}
+                </button>
+              </div>
+            </div>
+            <div style={{ color: 'var(--t5)', fontSize: 13, lineHeight: 1.5 }}>
+              Bu şifreyi kullanıcıya güvenli bir kanaldan iletin. Kullanıcı giriş yaptıktan sonra Sidebar'daki 🔑 butonundan kendi şifresini değiştirebilir.
+            </div>
+            <button onClick={() => setResetResult(null)} style={s.btnPrimary}>Kapat</button>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }
