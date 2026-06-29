@@ -58,6 +58,7 @@ export default function Sidebar({ role, activePage, setActivePage, user, onLogou
     { id: 'personel',     icon: '👷', label: 'Personel',       feature: 'staff' },
     { id: 'mesajlar',     icon: '💬', label: 'Mesajlar',       feature: 'messaging' },
     { id: 'raporlar',     icon: '📈', label: 'Raporlar' },
+    { id: 'ayarlar',      icon: '⚙️', label: 'Ayarlar' },
   ]
   const residentMenu = [
     { id: 'dashboard',   icon: '⊞',  label: 'Genel Bakış' },

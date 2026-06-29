@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Sidebar from '../components/Sidebar'
 import client from '../api/client'
+import { useTenant } from '../api/tenant'
 
 export default function AdminDashboard({ user, onLogout, tenantName }) {
   const [activePage, setActivePage] = useState('dashboard')
@@ -31,6 +32,7 @@ export default function AdminDashboard({ user, onLogout, tenantName }) {
       case 'personel':    return <PersonelContent buildingId={buildingId} />
       case 'mesajlar':    return <MesajlarContent buildingId={buildingId} user={user} isAdmin />
       case 'raporlar':    return <RaporlarContent buildingId={buildingId} />
+      case 'ayarlar':     return <AyarlarContent />
       default: return <DashboardContent buildingId={buildingId} />
     }
   }
@@ -41,6 +43,7 @@ export default function AdminDashboard({ user, onLogout, tenantName }) {
     kullanicilar: 'Kullanıcı Yönetimi', bakim: 'Bakım Takvimi', belgeler: 'Belgeler',
     anket: 'Anketler', rezervasyon: 'Ortak Alan Rezervasyonu', ziyaretci: 'Ziyaretçi Takibi',
     personel: 'Personel Yönetimi', mesajlar: 'Mesajlar', raporlar: 'Aylık Raporlar',
+    ayarlar: 'Ayarlar',
   }
 
   return (
@@ -1728,6 +1731,120 @@ function RaporlarContent({ buildingId }) {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function AyarlarContent() {
+  const { tenant, loading } = useTenant()
+  const [features, setFeatures] = useState({})
+  const [saving, setSaving] = useState(false)
+  const [msg, setMsg] = useState('')
+
+  useEffect(() => {
+    if (tenant?.features) setFeatures(tenant.features)
+  }, [tenant])
+
+  if (loading || !tenant) return <Spinner />
+
+  const featureMeta = [
+    { key: 'maintenance',  label: 'Bakım Takvimi',   desc: 'Periyodik bakım planlama ve takip' },
+    { key: 'documents',    label: 'Belgeler',         desc: 'PDF, sözleşme ve karar tutanakları' },
+    { key: 'surveys',      label: 'Anketler',         desc: 'Sakinlere yönelik oylama ve anket' },
+    { key: 'reservations', label: 'Rezervasyon',      desc: 'Ortak alan rezervasyon sistemi' },
+    { key: 'visitors',     label: 'Ziyaretçi Takibi', desc: 'Misafir ve ziyaretçi kayıt sistemi' },
+    { key: 'staff',        label: 'Personel',         desc: 'Çalışan kayıtları ve maaş takibi' },
+    { key: 'messaging',    label: 'Mesajlaşma',       desc: 'Yönetim ↔ sakin yazışmaları' },
+  ]
+
+  const toggle = (key) => setFeatures(f => ({ ...f, [key]: !f[key] }))
+
+  const save = async () => {
+    setSaving(true); setMsg('')
+    try {
+      await client.put('/api/buildings/me/features', { features })
+      setMsg('Ayarlar kaydedildi. Sayfa yenileniyor...')
+      setTimeout(() => window.location.reload(), 1000)
+    } catch (err) {
+      setMsg(err.response?.data?.error || 'Kaydetme başarısız')
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 720 }}>
+      <div style={{ ...s.card }}>
+        <div style={s.cardTitle}>Plan Bilgisi</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
+          <span style={{ color: 'var(--t3)' }}>Bina</span>
+          <span style={{ color: 'var(--t1)', fontWeight: 600 }}>{tenant.name}</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
+          <span style={{ color: 'var(--t3)' }}>Aktif Plan</span>
+          <span style={{ color: '#3B82F6', fontWeight: 700, textTransform: 'uppercase' }}>{tenant.plan}</span>
+        </div>
+      </div>
+
+      <div style={{ ...s.card }}>
+        <div style={s.cardTitle}>Özellik Yönetimi</div>
+        <p style={{ color: 'var(--t5)', fontSize: 13, marginBottom: 16 }}>
+          Kapatılan özellikler sakinler ve yöneticiler için sidebar'dan kaldırılır, API erişimi engellenir.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {featureMeta.map(f => (
+            <label key={f.key} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '14px 16px', background: 'var(--bg-input)',
+              border: '1px solid var(--border-soft)', borderRadius: 10, cursor: 'pointer',
+            }}>
+              <div>
+                <div style={{ color: 'var(--t1)', fontWeight: 600, fontSize: 14 }}>{f.label}</div>
+                <div style={{ color: 'var(--t5)', fontSize: 12, marginTop: 2 }}>{f.desc}</div>
+              </div>
+              <div style={{
+                width: 42, height: 24, borderRadius: 12,
+                background: features[f.key] ? '#3B82F6' : 'var(--border-strong)',
+                position: 'relative', transition: 'background 0.2s',
+              }}>
+                <input
+                  type="checkbox"
+                  checked={!!features[f.key]}
+                  onChange={() => toggle(f.key)}
+                  style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer' }}
+                />
+                <div style={{
+                  width: 18, height: 18, borderRadius: '50%', background: '#fff',
+                  position: 'absolute', top: 3, left: features[f.key] ? 21 : 3,
+                  transition: 'left 0.2s', pointerEvents: 'none',
+                }} />
+              </div>
+            </label>
+          ))}
+        </div>
+
+        {msg && (
+          <div style={{
+            marginTop: 16, padding: '10px 14px', borderRadius: 8,
+            background: msg.includes('başarısız') ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
+            color: msg.includes('başarısız') ? '#FCA5A5' : '#6EE7B7',
+            fontSize: 13,
+          }}>{msg}</div>
+        )}
+
+        <button
+          onClick={save}
+          disabled={saving}
+          style={{
+            marginTop: 16, padding: '12px 20px',
+            background: saving ? 'var(--border-strong)' : 'linear-gradient(135deg, #3B82F6, #2563EB)',
+            color: '#fff', border: 'none', borderRadius: 8,
+            fontSize: 14, fontWeight: 600, cursor: saving ? 'default' : 'pointer',
+            fontFamily: 'DM Sans, sans-serif',
+          }}
+        >
+          {saving ? 'Kaydediliyor...' : 'Kaydet'}
+        </button>
+      </div>
     </div>
   )
 }
