@@ -138,9 +138,10 @@ html { scroll-behavior: smooth; }
 .lp-cta-sub { font-size: 16px; color: #94A3B8; margin-bottom: 36px; }
 
 /* Footer */
-.lp-footer { display: flex; align-items: center; justify-content: space-between; padding: 28px 60px; border-top: 1px solid var(--border-soft); }
-.lp-footer-text { font-size: 13px; color: var(--t4); }
-.lp-footer-links { display: flex; align-items: center; gap: 20px; }
+.lp-footer { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 28px 60px; border-top: 1px solid var(--border-soft); }
+.lp-footer > :first-child { justify-self: start; }
+.lp-footer-text { font-size: 13px; color: var(--t4); justify-self: center; text-align: center; }
+.lp-footer-links { display: flex; align-items: center; gap: 20px; justify-self: end; }
 .lp-footer-link { font-size: 13px; color: var(--t3); text-decoration: none; transition: color 0.2s; }
 .lp-footer-link:hover { color: var(--t1); }
 
@@ -188,7 +189,8 @@ html { scroll-behavior: smooth; }
   .lp-cta { padding: 56px 24px; }
   .lp-cta-title { font-size: 28px; }
 
-  .lp-footer { flex-direction: column; gap: 12px; padding: 24px 20px; text-align: center; }
+  .lp-footer { display: flex; flex-direction: column; gap: 12px; padding: 24px 20px; text-align: center; }
+  .lp-footer > :first-child, .lp-footer-text, .lp-footer-links { justify-self: auto; }
   .lp-footer-links { flex-direction: column; gap: 8px; }
   .lp-whatsapp-btn { bottom: 20px; right: 20px; width: 50px; height: 50px; }
 }
